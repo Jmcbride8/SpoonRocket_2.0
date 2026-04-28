@@ -13,8 +13,9 @@ const adminLinks = [
   { to: '/management', label: 'Management', icon: BarChart3 },
   { to: '/dispatch', label: 'Dispatch', icon: Map },
   { to: '/operations', label: 'Operations', icon: Settings },
-  { to: '/inventory', label: 'Inventory', icon: Package, subMenu: true },
-  { to: '/menu', label: 'Menu', icon: ChefHat, subMenu: true },
+  { to: '/inventory', label: 'Inventory', icon: Package },
+  { to: '/recipe-library', label: 'Recipes', icon: ChefHat },
+  { to: '/menu-planner', label: 'Planner', icon: Package },
 ];
 
 const driverLinks = [

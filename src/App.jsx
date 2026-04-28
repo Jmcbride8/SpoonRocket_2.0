@@ -15,6 +15,8 @@ import DriverApp from './pages/DriverApp';
 import DeliveryOperations from './pages/DeliveryOperations';
 import InventoryManagement from './pages/InventoryManagement';
 import MenuRotation from './pages/MenuRotation';
+import MenuItemLibrary from './pages/MenuItemLibrary';
+import MenuPlanner from './pages/MenuPlanner';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -59,6 +61,8 @@ const AuthenticatedApp = () => {
           <Route path="/operations" element={<DeliveryOperations />} />
           <Route path="/inventory" element={<InventoryManagement />} />
           <Route path="/menu" element={<MenuRotation />} />
+          <Route path="/recipe-library" element={<MenuItemLibrary />} />
+          <Route path="/menu-planner" element={<MenuPlanner />} />
         </Route>
         <Route path="*" element={<PageNotFound />} />
       </Routes>
