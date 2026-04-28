@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Pencil, Trash2, ChefHat, Calendar, ToggleLeft, ToggleRight, Beef, Salad, GlassWater, Blend } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChefHat, Calendar, ToggleLeft, ToggleRight, Beef, Salad, GlassWater, Blend, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,6 +28,7 @@ export default function MenuManagement() {
   const [form, setForm] = useState(emptyForm);
   const [filterDate, setFilterDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -60,6 +61,19 @@ export default function MenuManagement() {
   const toggleActive = async (item) => {
     await base44.entities.MenuItem.update(item.id, { is_active: !item.is_active });
     await load();
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setForm(p => ({...p, image_url: file_url}));
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -175,7 +189,33 @@ export default function MenuManagement() {
                 <Input placeholder="Price ($) *" type="number" min="0" step="0.01" value={form.price} onChange={e => setForm(p => ({...p, price: e.target.value}))} />
                 <Input placeholder="Calories" type="number" value={form.calories} onChange={e => setForm(p => ({...p, calories: e.target.value}))} />
               </div>
-              <Input placeholder="Image URL" value={form.image_url} onChange={e => setForm(p => ({...p, image_url: e.target.value}))} />
+              <div>
+                <label className="text-xs text-muted-foreground mb-2 block">Meal Image</label>
+                {form.image_url ? (
+                  <div className="relative group">
+                    <img src={form.image_url} alt="preview" className="w-full h-32 object-cover rounded-lg" />
+                    <button
+                      type="button"
+                      onClick={() => setForm(p => ({...p, image_url: ''}))}
+                      className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex items-center justify-center gap-2 w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <Upload className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">{uploading ? 'Uploading...' : 'Click to upload'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
               <Input placeholder="Allergens" value={form.allergens} onChange={e => setForm(p => ({...p, allergens: e.target.value}))} />
               <div className="grid grid-cols-2 gap-3">
                 <div>
