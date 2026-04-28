@@ -144,9 +144,9 @@ export default function DispatchScreen() {
     const invMap = {};
     driverInv.forEach(inv => {
       const remaining = (inv.quantity_loaded || 0) - (inv.quantity_sold || 0) - (inv.quantity_spoiled || 0);
-      invMap[inv.menu_item_id] = remaining;
+      invMap[inv.menu_item_name] = remaining;
     });
-    return (order.items || []).every(item => (invMap[item.menu_item_id] || 0) >= item.quantity);
+    return (order.items || []).every(item => (invMap[item.name] || 0) >= item.quantity);
   };
   
   const filteredOrders = ageFilter === 'all' 
