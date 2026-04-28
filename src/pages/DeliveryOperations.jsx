@@ -56,6 +56,14 @@ export default function DeliveryOperations() {
       assigned[inv.menu_item_id] = (assigned[inv.menu_item_id] || 0) + (inv.quantity_loaded || 0);
     });
     setAssignedQuantities(assigned);
+
+    // Group inventory by driver
+    const byDriver = {};
+    allAssigned.forEach(inv => {
+      if (!byDriver[inv.driver_id]) byDriver[inv.driver_id] = [];
+      byDriver[inv.driver_id].push(inv);
+    });
+    setDriverInventory(byDriver);
     setLoading(false);
   };
 
@@ -88,9 +96,9 @@ export default function DeliveryOperations() {
         });
       }
     }
+    await load();
     setShowInventoryModal(null);
     setInventoryForm([]);
-    await load();
   };
 
   const openInventoryModal = (driver) => {
