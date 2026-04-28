@@ -239,9 +239,9 @@ export default function DeliveryOperations() {
                   )}
                 </div>
               )}
-                    </div>
-                  ))}
-                </div>
+                   </div>
+                 ))}
+               </div>
               ) : null;
               })()}
 
