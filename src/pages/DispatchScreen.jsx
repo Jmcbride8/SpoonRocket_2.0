@@ -17,10 +17,26 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const createDriverIcon = (selected = false) => L.divIcon({
-  html: `<div style="background:#165a34;width:${selected ? 40 : 32}px;height:${selected ? 40 : 32}px;display:flex;align-items:center;justify-content:center;box-shadow:0 ${selected ? 4 : 2}px ${selected ? 12 : 8}px rgba(0,0,0,0.25);clip-path:polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)"><svg xmlns="http://www.w3.org/2000/svg" width="${selected ? 18 : 16}" height="${selected ? 18 : 16}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8L20 12v6h-1v2h-2v-2H7v2H5v-2H4v-6L8 4z"/><circle cx="8.5" cy="15" r="1.5" fill="white"/><circle cx="15.5" cy="15" r="1.5" fill="white"/></svg></div>`,
-  iconSize: [selected ? 40 : 32, selected ? 40 : 32], iconAnchor: [selected ? 20 : 16, selected ? 20 : 16], className: ''
-});
+const createDriverIcon = (driverStatus, selected = false) => {
+  let bgColor = '#9ca3af'; // gray - unassigned
+  let borderColor = 'white';
+  let icon = '📍'; // default pin
+
+  if (driverStatus === 'accepted') {
+    bgColor = '#22c55e'; // green - accepted/en route
+    icon = '✓';
+  } else if (driverStatus === 'assigned') {
+    bgColor = '#3b82f6'; // blue - assigned but not accepted
+    icon = '⌚';
+  }
+
+  return L.divIcon({
+    html: `<div style="background:${bgColor};border:3px solid ${borderColor};border-radius:50%;width:${selected ? 40 : 32}px;height:${selected ? 40 : 32}px;display:flex;align-items:center;justify-content:center;box-shadow:0 ${selected ? 4 : 2}px ${selected ? 12 : 8}px rgba(0,0,0,0.25);font-size:${selected ? 18 : 16}px;font-weight:bold;color:white;line-height:1">${icon}</div>`,
+    iconSize: [selected ? 40 : 32, selected ? 40 : 32], 
+    iconAnchor: [selected ? 20 : 16, selected ? 20 : 16], 
+    className: ''
+  });
+};
 
 const createOrderIcon = (order) => {
   const now = new Date();
@@ -127,6 +143,13 @@ export default function DispatchScreen() {
     ? allActiveOrders 
     : allActiveOrders.filter(o => getAgeCategory(getOrderAge(o)) === ageFilter);
 
+  const getDriverStatus = (driver) => {
+    const assignedOrders = orders.filter(o => o.driver_id === driver.id && !['delivered', 'cancelled'].includes(o.status));
+    if (assignedOrders.length === 0) return 'unassigned';
+    if (assignedOrders.some(o => ['accepted', 'in_transit'].includes(o.status))) return 'accepted';
+    return 'assigned';
+  };
+
   const InventoryBar = ({ driverId }) => {
     const inv = driverInventories[driverId] || [];
     if (inv.length === 0) return <p className="text-xs text-muted-foreground italic px-1">No inventory loaded</p>;
@@ -207,7 +230,7 @@ export default function DispatchScreen() {
                   <Marker
                     key={driver.id}
                     position={[driver.latitude, driver.longitude]}
-                    icon={createDriverIcon(selectedDriver?.id === driver.id)}
+                    icon={createDriverIcon(getDriverStatus(driver), selectedDriver?.id === driver.id)}
                     eventHandlers={{ click: () => setSelectedDriver(driver) }}
                   >
                     <Popup>
