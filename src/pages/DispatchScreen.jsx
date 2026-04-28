@@ -138,9 +138,20 @@ export default function DispatchScreen() {
 
   const allActiveOrders = orders.filter(o => !['delivered', 'cancelled'].includes(o.status));
   
+  const canServiceOrder = (order) => {
+    if (!selectedDriver) return true;
+    const driverInv = driverInventories[selectedDriver.id] || [];
+    const invMap = {};
+    driverInv.forEach(inv => {
+      const remaining = (inv.quantity_loaded || 0) - (inv.quantity_sold || 0) - (inv.quantity_spoiled || 0);
+      invMap[inv.menu_item_id] = remaining;
+    });
+    return (order.items || []).every(item => (invMap[item.menu_item_id] || 0) >= item.quantity);
+  };
+  
   const filteredOrders = ageFilter === 'all' 
-    ? allActiveOrders 
-    : allActiveOrders.filter(o => getAgeCategory(getOrderAge(o)) === ageFilter);
+    ? allActiveOrders.filter(o => canServiceOrder(o))
+    : allActiveOrders.filter(o => canServiceOrder(o) && getAgeCategory(getOrderAge(o)) === ageFilter);
 
   const getDriverStatus = (driver) => {
     const assignedOrders = orders.filter(o => o.driver_id === driver.id && !['delivered', 'cancelled'].includes(o.status));
@@ -259,8 +270,8 @@ export default function DispatchScreen() {
               }
               return null;
             })}
-            {filteredOrders.map(order => (
-              order.delivery_latitude && order.delivery_longitude ? (
+            {filteredOrders.filter(o => canServiceOrder(o)).map(order => (
+               order.delivery_latitude && order.delivery_longitude ? (
                 <Marker
                   key={order.id}
                   position={[order.delivery_latitude, order.delivery_longitude]}
