@@ -19,12 +19,19 @@ export default function InventoryManagement() {
 
   const load = async () => {
     setLoading(true);
-    const items = await base44.entities.MenuItem.filter({ menu_date: selectedDate, is_active: true });
-    const grouped = {};
-    CATEGORIES.forEach(cat => {
-      grouped[cat] = items.filter(i => i.category === cat);
-    });
-    setInventory(grouped);
+    try {
+      const items = await base44.entities.MenuItem.filter({ menu_date: selectedDate, is_active: true });
+      const grouped = {};
+      CATEGORIES.forEach(cat => {
+        grouped[cat] = items.filter(i => i.category === cat);
+      });
+      setInventory(grouped);
+    } catch (error) {
+      console.error('Failed to load inventory:', error);
+      const grouped = {};
+      CATEGORIES.forEach(cat => { grouped[cat] = []; });
+      setInventory(grouped);
+    }
     setLoading(false);
   };
 
@@ -77,43 +84,52 @@ export default function InventoryManagement() {
       </div>
 
       {/* Inventory Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {CATEGORIES.map(cat => (
-          <div key={cat} className="bg-background border border-foreground/10 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-foreground capitalize">{cat}</h2>
-              <span className="text-sm px-3 py-1 rounded-full bg-foreground/10 text-foreground">
-                {inventory[cat]?.length || 0} items
-              </span>
-            </div>
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="w-8 h-8 border-4 border-foreground/30 border-t-foreground rounded-full animate-spin mx-auto" />
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-6">
+          {CATEGORIES.map(cat => {
+            const items = inventory[cat] || [];
+            return (
+              <div key={cat} className="bg-background border border-foreground/10 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-semibold text-foreground capitalize">{cat}</h2>
+                  <span className="text-sm px-3 py-1 rounded-full bg-foreground/10 text-foreground">
+                    {items.length} items
+                  </span>
+                </div>
 
-            {inventory[cat]?.length === 0 ? (
-              <p className="text-foreground/60 text-sm italic">No items configured</p>
-            ) : (
-              <div className="space-y-3 mb-4">
-                {inventory[cat].map(item => (
-                  <div key={item.id} className="flex items-center justify-between p-3 bg-foreground/3 rounded-lg border border-foreground/10">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{item.name}</p>
-                      <p className="text-xs text-foreground/60">${item.price}</p>
+                {items.length === 0 ? (
+                  <p className="text-foreground/60 text-sm italic">No items configured</p>
+                ) : (
+                  <div className="space-y-3 mb-4">
+                    {items.map(item => (
+                      <div key={item.id} className="flex items-center justify-between p-3 bg-foreground/3 rounded-lg border border-foreground/10">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{item.name}</p>
+                          <p className="text-xs text-foreground/60">${item.price}</p>
+                        </div>
+                        <span className="text-sm font-semibold text-foreground">TBD</span>
+                      </div>
+                    ))}
                     </div>
-                    <span className="text-sm font-semibold text-foreground">TBD</span>
-                  </div>
-                ))}
-              </div>
-            )}
+                    )}
 
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" className="flex-1 border-foreground/20 text-foreground hover:bg-foreground/5">
-                Carry Over
-              </Button>
-              <Button size="sm" variant="outline" className="flex-1 border-foreground/20 text-foreground hover:bg-foreground/5">
-                Mark Waste
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
+                    <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="flex-1 border-foreground/20 text-foreground hover:bg-foreground/5">
+                    Carry Over
+                    </Button>
+                    <Button size="sm" variant="outline" className="flex-1 border-foreground/20 text-foreground hover:bg-foreground/5">
+                    Mark Waste
+                    </Button>
+                    </div>
+                    </div>
+                    );
+                    })}
+                    </div>
+                    )}
 
       {/* Set Meals Modal */}
       {showModal && (
