@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Button } from '@/components/ui/button';
-import { Truck, CheckCircle, Beef, Salad, GlassWater, Blend } from 'lucide-react';
+import { Truck, CheckCircle, Beef, Salad, GlassWater, Blend, Filter } from 'lucide-react';
 
 const CATEGORY_ICON_COMPONENTS = { meat: Beef, salad: Salad, drink: GlassWater, smoothie: Blend };
 import { format } from 'date-fns';
@@ -66,7 +66,8 @@ export default function DispatchScreen() {
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [assigning, setAssigning] = useState(null);
   const [tab, setTab] = useState('map');
-  const [driverInventories, setDriverInventories] = useState({}); // { driverId: [inv items] }
+  const [driverInventories, setDriverInventories] = useState({});
+  const [ageFilter, setAgeFilter] = useState('all');
 
   const DEFAULT_CENTER = [37.7749, -122.4194];
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -107,7 +108,24 @@ export default function DispatchScreen() {
     setAssigning(null);
   };
 
+  const getOrderAge = (order) => {
+    const now = new Date();
+    const orderTime = new Date(order.created_date);
+    return Math.floor((now - orderTime) / (1000 * 60)); // minutes
+  };
+
+  const getAgeCategory = (minutes) => {
+    if (minutes > 60) return 'very_late';
+    if (minutes > 30) return 'late';
+    if (minutes > 10) return 'aging';
+    return 'fresh';
+  };
+
   const allActiveOrders = orders.filter(o => !['delivered', 'cancelled'].includes(o.status));
+  
+  const filteredOrders = ageFilter === 'all' 
+    ? allActiveOrders 
+    : allActiveOrders.filter(o => getAgeCategory(getOrderAge(o)) === ageFilter);
 
   const InventoryBar = ({ driverId }) => {
     const inv = driverInventories[driverId] || [];
@@ -138,20 +156,34 @@ export default function DispatchScreen() {
   return (
     <div className="flex flex-col h-screen bg-foreground">
       {/* Top bar */}
-      <div className="px-6 py-4 border-b border-border bg-foreground flex items-center justify-between shrink-0">
+      <div className="px-6 py-4 border-b border-border bg-primary flex items-center justify-between shrink-0">
         <div>
-          <h1 className="font-sans text-xl font-bold text-background">Dispatch</h1>
-          <p className="text-xs text-background/60">{drivers.length} active · {orders.length} pending</p>
+          <h1 className="font-sans text-xl font-bold text-primary-foreground">Dispatch</h1>
+          <p className="text-xs text-primary-foreground/70">{drivers.length} active · {allActiveOrders.length} pending</p>
         </div>
         <div className="flex items-center gap-3">
+           <div className="flex items-center gap-2 bg-primary-foreground/20 border border-primary-foreground/30 rounded-lg px-2 py-1">
+             <Filter className="w-3.5 h-3.5 text-primary-foreground/70" />
+             <select
+               value={ageFilter}
+               onChange={e => setAgeFilter(e.target.value)}
+               className="bg-transparent text-xs font-medium text-primary-foreground outline-none"
+             >
+               <option value="all">All Orders</option>
+               <option value="fresh">Fresh (&lt;10m)</option>
+               <option value="aging">Aging (10-30m)</option>
+               <option value="late">Late (30-60m)</option>
+               <option value="very_late">Very Late (&gt;60m)</option>
+             </select>
+           </div>
            {selectedDriver && (
-             <div className="flex items-center gap-2 bg-background border border-background/20 px-3 py-1.5 rounded-lg">
-               <div className="w-2 h-2 rounded-full bg-background animate-pulse" />
-               <span className="text-sm font-medium text-background">{selectedDriver.full_name}</span>
-               <button onClick={() => setSelectedDriver(null)} className="text-background hover:opacity-70 ml-1 text-lg leading-none">&times;</button>
+             <div className="flex items-center gap-2 bg-primary-foreground/20 border border-primary-foreground/30 px-3 py-1.5 rounded-lg">
+               <div className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
+               <span className="text-sm font-medium text-primary-foreground">{selectedDriver.full_name}</span>
+               <button onClick={() => setSelectedDriver(null)} className="text-primary-foreground hover:opacity-70 ml-1 text-lg leading-none">&times;</button>
              </div>
            )}
-           <Button className="bg-background text-foreground hover:bg-background/90" size="sm" onClick={load}>Refresh</Button>
+           <Button className="bg-primary-foreground text-primary hover:bg-primary-foreground/90" size="sm" onClick={load}>Refresh</Button>
         </div>
       </div>
 
@@ -169,40 +201,43 @@ export default function DispatchScreen() {
         <div className={`flex-1 relative ${tab !== 'map' ? 'hidden md:block' : ''}`}>
           <MapContainer center={DEFAULT_CENTER} zoom={12} style={{ height: '100%', width: '100%' }}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='© OpenStreetMap' />
-            {drivers.map(driver => (
-              driver.latitude && driver.longitude ? (
-                <Marker
-                  key={driver.id}
-                  position={[driver.latitude, driver.longitude]}
-                  icon={createDriverIcon(selectedDriver?.id === driver.id)}
-                  eventHandlers={{ click: () => setSelectedDriver(driver) }}
-                >
-                  <Popup>
-                    <div className="text-sm min-w-[160px]">
-                      <p className="font-bold mb-0.5">{driver.full_name}</p>
-                      <p className="text-gray-500 text-xs mb-2">{driver.city} · {driver.vehicle_plate}</p>
-                      <p className="text-xs font-semibold text-gray-600 mb-1">Inventory remaining:</p>
-                      {(driverInventories[driver.id] || []).length === 0 ? (
-                        <p className="text-xs text-gray-400 italic">No inventory loaded</p>
-                      ) : (
-                        <div className="flex flex-col gap-1">
-                          {(driverInventories[driver.id] || []).map(item => {
-                            const rem = (item.quantity_loaded || 0) - (item.quantity_sold || 0) - (item.quantity_spoiled || 0);
-                            return (
-                              <div key={item.id} className="flex items-center justify-between gap-2">
-                                <span className="text-xs capitalize text-gray-700">{item.menu_item_category}: {item.menu_item_name}</span>
-                                <span className={`text-xs font-bold ${rem === 0 ? 'text-red-500' : rem <= 2 ? 'text-yellow-600' : 'text-green-600'}`}>{rem}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </Popup>
-                </Marker>
-              ) : null
-            ))}
-            {allActiveOrders.map(order => (
+            {drivers.map(driver => {
+              if (!selectedDriver || selectedDriver.id === driver.id) {
+                return driver.latitude && driver.longitude ? (
+                  <Marker
+                    key={driver.id}
+                    position={[driver.latitude, driver.longitude]}
+                    icon={createDriverIcon(selectedDriver?.id === driver.id)}
+                    eventHandlers={{ click: () => setSelectedDriver(driver) }}
+                  >
+                    <Popup>
+                      <div className="text-sm min-w-[160px]">
+                        <p className="font-bold mb-0.5">{driver.full_name}</p>
+                        <p className="text-gray-500 text-xs mb-2">{driver.city} · {driver.vehicle_plate}</p>
+                        <p className="text-xs font-semibold text-gray-600 mb-1">Inventory remaining:</p>
+                        {(driverInventories[driver.id] || []).length === 0 ? (
+                          <p className="text-xs text-gray-400 italic">No inventory loaded</p>
+                        ) : (
+                          <div className="flex flex-col gap-1">
+                            {(driverInventories[driver.id] || []).map(item => {
+                              const rem = (item.quantity_loaded || 0) - (item.quantity_sold || 0) - (item.quantity_spoiled || 0);
+                              return (
+                                <div key={item.id} className="flex items-center justify-between gap-2">
+                                  <span className="text-xs capitalize text-gray-700">{item.menu_item_category}: {item.menu_item_name}</span>
+                                  <span className={`text-xs font-bold ${rem === 0 ? 'text-red-500' : rem <= 2 ? 'text-yellow-600' : 'text-green-600'}`}>{rem}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </Popup>
+                  </Marker>
+                ) : null;
+              }
+              return null;
+            })}
+            {filteredOrders.map(order => (
               order.delivery_latitude && order.delivery_longitude ? (
                 <Marker
                   key={order.id}
@@ -283,15 +318,17 @@ export default function DispatchScreen() {
           {/* Orders with item breakdown */}
           <div className="flex-1 overflow-hidden flex flex-col bg-background">
             <div className="px-4 py-3 border-b border-border bg-foreground">
-              <p className="text-xs font-semibold text-background/60 uppercase tracking-wide">Pending Orders</p>
+              <p className="text-xs font-semibold text-background/60 uppercase tracking-wide">
+                {ageFilter === 'all' ? 'Pending Orders' : ageFilter.replace('_', ' ').toUpperCase()}
+              </p>
             </div>
             <div className="overflow-y-auto flex-1">
-              {orders.length === 0 ? (
+              {filteredOrders.length === 0 ? (
                 <div className="text-center py-8">
                   <CheckCircle className="w-8 h-8 text-background mx-auto mb-2" />
-                  <p className="text-sm text-foreground">All orders handled!</p>
+                  <p className="text-sm text-foreground">{ageFilter === 'all' ? 'All orders handled!' : 'No orders in this category'}</p>
                 </div>
-              ) : orders.map(order => (
+              ) : filteredOrders.map(order => (
                 <div key={order.id} className="px-4 py-3 border-b border-border/50 bg-background hover:bg-background/80 transition-colors">
                   {/* Customer + total */}
                   <div className="flex items-start justify-between gap-2 mb-1">
