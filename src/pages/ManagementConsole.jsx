@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 import { DollarSign, ShoppingBag, Truck, Star, AlertCircle, TrendingUp, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { format, subDays } from 'date-fns';
+import { format, subDays, startOfYear, endOfYear } from 'date-fns';
 
 const StatCard = ({ icon: Icon, label, value, sub, color }) => (
   <div className="bg-background border border-foreground/10 rounded-2xl p-5">
@@ -32,22 +32,34 @@ export default function ManagementConsole() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [updatingComplaint, setUpdatingComplaint] = useState(null);
+  const [financialPeriod, setFinancialPeriod] = useState('day'); // day, week, ytd
 
   useEffect(() => {
     Promise.all([
-      base44.entities.Order.list('-created_date', 200),
+      base44.entities.Order.list('-created_date', 500),
       base44.entities.Complaint.list('-created_date', 100),
     ]).then(([o, c]) => { setOrders(o); setComplaints(c); setLoading(false); });
   }, []);
 
   const today = format(new Date(), 'yyyy-MM-dd');
+  const yearStart = format(startOfYear(new Date()), 'yyyy-MM-dd');
+  const weekStart = format(subDays(new Date(), 6), 'yyyy-MM-dd');
+
+  // Calculate financials based on period
+  let relevantOrders = [];
+  if (financialPeriod === 'day') relevantOrders = orders.filter(o => o.order_date === today);
+  else if (financialPeriod === 'week') relevantOrders = orders.filter(o => new Date(o.order_date) >= new Date(weekStart));
+  else if (financialPeriod === 'ytd') relevantOrders = orders.filter(o => new Date(o.order_date) >= new Date(yearStart));
+
   const todayOrders = orders.filter(o => o.order_date === today);
   const totalRevenue = orders.filter(o => o.status === 'delivered').reduce((s, o) => s + (o.total || 0), 0);
+  const periodRevenue = relevantOrders.filter(o => o.status === 'delivered').reduce((s, o) => s + (o.total || 0), 0);
+  const periodDelivered = relevantOrders.filter(o => o.status === 'delivered').length;
   const todayRevenue = todayOrders.filter(o => o.status === 'delivered').reduce((s, o) => s + (o.total || 0), 0);
   const avgRating = orders.filter(o => o.customer_rating).reduce((s, o, _, a) => s + o.customer_rating / a.length, 0);
   const openComplaints = complaints.filter(c => c.status === 'open').length;
 
-  // Last 7 days revenue chart
+  // Revenue chart data (last 7 days)
   const revenueData = Array.from({ length: 7 }, (_, i) => {
     const d = format(subDays(new Date(), 6 - i), 'yyyy-MM-dd');
     const label = format(subDays(new Date(), 6 - i), 'MMM d');
@@ -55,10 +67,33 @@ export default function ManagementConsole() {
     return { date: label, revenue: parseFloat(rev.toFixed(2)) };
   });
 
+  // Weekly revenue (last 4 weeks)
+  const weeklyData = Array.from({ length: 4 }, (_, i) => {
+    const end = subDays(new Date(), i * 7);
+    const start = subDays(end, 7);
+    const label = `Week ${4 - i}`;
+    const rev = orders.filter(o => {
+      const oDate = new Date(o.order_date);
+      return oDate >= start && oDate <= end && o.status === 'delivered';
+    }).reduce((s, o) => s + (o.total || 0), 0);
+    return { week: label, revenue: parseFloat(rev.toFixed(2)) };
+  }).reverse();
+
+  // YTD monthly data
+  const monthlyData = Array.from({ length: 12 }, (_, i) => {
+    const monthNum = i + 1;
+    const monthLabel = new Date(2026, i, 1).toLocaleString('default', { month: 'short' });
+    const rev = orders.filter(o => {
+      const oDate = new Date(o.order_date);
+      return oDate.getMonth() === i && oDate.getFullYear() === 2026 && o.status === 'delivered';
+    }).reduce((s, o) => s + (o.total || 0), 0);
+    return { month: monthLabel, revenue: parseFloat(rev.toFixed(2)) };
+  });
+
   const statusData = [
-    { name: 'Delivered', count: orders.filter(o => o.status === 'delivered').length, fill: '#16a34a' },
+    { name: 'Delivered', count: orders.filter(o => o.status === 'delivered').length, fill: '#22c55e' },
     { name: 'In Transit', count: orders.filter(o => o.status === 'in_transit').length, fill: '#9333ea' },
-    { name: 'Pending', count: orders.filter(o => o.status === 'pending').length, fill: '#ca8a04' },
+    { name: 'Pending', count: orders.filter(o => o.status === 'pending').length, fill: '#eab308' },
     { name: 'Cancelled', count: orders.filter(o => o.status === 'cancelled').length, fill: '#dc2626' },
   ];
 
@@ -74,24 +109,24 @@ export default function ManagementConsole() {
   const tabs = ['overview', 'orders', 'complaints'];
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto bg-background">
+    <div className="p-6 md:p-8 max-w-7xl mx-auto bg-background">
       <div className="mb-8">
         <h1 className="font-sans text-2xl font-bold text-foreground mb-1">Management Console</h1>
         <p className="text-foreground/60 text-sm">Track deliveries, revenue, and customer feedback</p>
       </div>
 
       {/* Tabs */}
-       <div className="flex gap-1 bg-foreground/5 p-1 rounded-xl w-fit mb-6 border border-foreground/10">
-         {tabs.map(t => (
-           <button
-             key={t}
-             onClick={() => setActiveTab(t)}
-             className={`px-4 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${activeTab === t ? 'bg-background shadow-sm text-foreground border border-foreground/10' : 'text-foreground/60 hover:text-foreground'}`}
-           >
-             {t}
-           </button>
-         ))}
-       </div>
+      <div className="flex gap-1 bg-foreground/5 p-1 rounded-xl w-fit mb-6 border border-foreground/10">
+        {tabs.map(t => (
+          <button
+            key={t}
+            onClick={() => setActiveTab(t)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${activeTab === t ? 'bg-background shadow-sm text-foreground border border-foreground/10' : 'text-foreground/60 hover:text-foreground'}`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
 
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -101,37 +136,111 @@ export default function ManagementConsole() {
         <>
           {activeTab === 'overview' && (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <StatCard icon={DollarSign} label="Total Revenue" value={`$${totalRevenue.toFixed(0)}`} sub={`$${todayRevenue.toFixed(0)} today`} color="bg-green-100 text-green-700" />
-                <StatCard icon={ShoppingBag} label="Total Orders" value={orders.length} sub={`${todayOrders.length} today`} color="bg-blue-100 text-blue-700" />
-                <StatCard icon={Star} label="Avg. Rating" value={avgRating > 0 ? avgRating.toFixed(1) : '—'} sub="Customer satisfaction" color="bg-yellow-100 text-yellow-700" />
-                <StatCard icon={AlertCircle} label="Open Complaints" value={openComplaints} sub={`${complaints.length} total`} color="bg-red-100 text-red-700" />
+              {/* Financial Period Selector */}
+              <div className="flex gap-2 mb-6">
+                {['day', 'week', 'ytd'].map(period => (
+                  <button
+                    key={period}
+                    onClick={() => setFinancialPeriod(period)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      financialPeriod === period
+                        ? 'bg-foreground text-background'
+                        : 'bg-foreground/10 text-foreground hover:bg-foreground/20'
+                    }`}
+                  >
+                    {period === 'day' ? 'Today' : period === 'week' ? 'This Week' : 'Year to Date'}
+                  </button>
+                ))}
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              {/* Top Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <StatCard
+                  icon={DollarSign}
+                  label={financialPeriod === 'day' ? "Today's Revenue" : financialPeriod === 'week' ? "Weekly Revenue" : "YTD Revenue"}
+                  value={`$${periodRevenue.toFixed(0)}`}
+                  sub={`${periodDelivered} delivered`}
+                  color="bg-green-100 text-green-700"
+                />
+                <StatCard
+                  icon={ShoppingBag}
+                  label={financialPeriod === 'day' ? "Today's Orders" : financialPeriod === 'week' ? "Weekly Orders" : "YTD Orders"}
+                  value={relevantOrders.length}
+                  sub={`${relevantOrders.filter(o => o.status === 'delivered').length} delivered`}
+                  color="bg-blue-100 text-blue-700"
+                />
+                <StatCard
+                  icon={TrendingUp}
+                  label="Avg Order Value"
+                  value={`$${periodDelivered > 0 ? (periodRevenue / periodDelivered).toFixed(2) : '0'}`}
+                  sub={`${periodDelivered} total`}
+                  color="bg-purple-100 text-purple-700"
+                />
+                <StatCard
+                  icon={Star}
+                  label="Avg Rating"
+                  value={avgRating > 0 ? avgRating.toFixed(1) : '—'}
+                  sub="Customer satisfaction"
+                  color="bg-yellow-100 text-yellow-700"
+                />
+              </div>
+
+              {/* Charts Grid */}
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                {/* Daily Revenue (7 days) */}
                 <div className="bg-background border border-foreground/10 rounded-2xl p-5">
-                  <h3 className="font-semibold text-sm mb-4 text-foreground">Revenue (Last 7 Days)</h3>
-                  <ResponsiveContainer width="100%" height={180}>
+                  <h3 className="font-semibold text-sm mb-4 text-foreground">Revenue - Last 7 Days</h3>
+                  <ResponsiveContainer width="100%" height={200}>
                     <LineChart data={revenueData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                      <YAxis tick={{ fontSize: 11 }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 20% / 0.1)" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="currentColor" />
+                      <YAxis tick={{ fontSize: 11 }} stroke="currentColor" />
                       <Tooltip formatter={(v) => [`$${v}`, 'Revenue']} />
-                      <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: 'hsl(var(--primary))' }} />
+                      <Line type="monotone" dataKey="revenue" stroke="currentColor" strokeWidth={2} dot={{ fill: 'currentColor' }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
+
+                {/* Weekly Revenue (last 4 weeks) */}
                 <div className="bg-background border border-foreground/10 rounded-2xl p-5">
-                  <h3 className="font-semibold text-sm mb-4 text-foreground">Order Status Breakdown</h3>
-                  <ResponsiveContainer width="100%" height={180}>
-                    <BarChart data={statusData}>
-                      <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                      <YAxis tick={{ fontSize: 11 }} />
-                      <Tooltip />
-                      <Bar dataKey="count" radius={[4,4,0,0]} fill="hsl(var(--primary))" />
+                  <h3 className="font-semibold text-sm mb-4 text-foreground">Revenue - Last 4 Weeks</h3>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={weeklyData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 20% / 0.1)" />
+                      <XAxis dataKey="week" tick={{ fontSize: 11 }} stroke="currentColor" />
+                      <YAxis tick={{ fontSize: 11 }} stroke="currentColor" />
+                      <Tooltip formatter={(v) => [`$${v}`, 'Revenue']} />
+                      <Bar dataKey="revenue" radius={[4,4,0,0]} fill="currentColor" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
+              </div>
+
+              {/* YTD Monthly Breakdown */}
+              <div className="bg-background border border-foreground/10 rounded-2xl p-5 mb-6">
+                <h3 className="font-semibold text-sm mb-4 text-foreground">Year to Date - Monthly Breakdown</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 20% / 0.1)" />
+                    <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="currentColor" />
+                    <YAxis tick={{ fontSize: 11 }} stroke="currentColor" />
+                    <Tooltip formatter={(v) => [`$${v}`, 'Revenue']} />
+                    <Bar dataKey="revenue" radius={[4,4,0,0]} fill="currentColor" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Order Status Breakdown */}
+              <div className="bg-background border border-foreground/10 rounded-2xl p-5">
+                <h3 className="font-semibold text-sm mb-4 text-foreground">Order Status Breakdown (All Time)</h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={statusData}>
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="currentColor" />
+                    <YAxis tick={{ fontSize: 11 }} stroke="currentColor" />
+                    <Tooltip />
+                    <Bar dataKey="count" radius={[4,4,0,0]} fill="currentColor" />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </>
           )}
@@ -174,7 +283,7 @@ export default function ManagementConsole() {
                         <td className="px-4 py-3">
                           {order.customer_rating ? (
                             <span className="flex items-center gap-1 text-yellow-600">
-                              <Star className="w-3 h-3 fill-current" /> {order.customer_rating}
+                              ⭐ {order.customer_rating}
                             </span>
                           ) : '—'}
                         </td>

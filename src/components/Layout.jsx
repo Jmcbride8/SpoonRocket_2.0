@@ -4,16 +4,17 @@ import { useAuth } from '@/lib/AuthContext';
 import { useState } from 'react';
 import {
   ChefHat, Map, BarChart3, Truck, Settings, ShoppingBag,
-  Menu, X, LogOut, User
+  Menu, X, LogOut, User, Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const adminLinks = [
-  { to: '/menu', label: 'Daily Menu', icon: ChefHat },
-  { to: '/dispatch', label: 'Dispatch', icon: Map },
   { to: '/management', label: 'Management', icon: BarChart3 },
+  { to: '/dispatch', label: 'Dispatch', icon: Map },
   { to: '/operations', label: 'Operations', icon: Settings },
+  { to: '/inventory', label: 'Inventory', icon: Package, subMenu: true },
+  { to: '/menu', label: 'Menu', icon: ChefHat, subMenu: true },
 ];
 
 const driverLinks = [

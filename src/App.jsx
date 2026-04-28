@@ -13,6 +13,8 @@ import DispatchScreen from './pages/DispatchScreen';
 import ManagementConsole from './pages/ManagementConsole';
 import DriverApp from './pages/DriverApp';
 import DeliveryOperations from './pages/DeliveryOperations';
+import InventoryManagement from './pages/InventoryManagement';
+import MenuRotation from './pages/MenuRotation';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -51,11 +53,12 @@ const AuthenticatedApp = () => {
     return (
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<MenuManagement />} />
-          <Route path="/menu" element={<MenuManagement />} />
-          <Route path="/dispatch" element={<DispatchScreen />} />
+          <Route path="/" element={<ManagementConsole />} />
           <Route path="/management" element={<ManagementConsole />} />
+          <Route path="/dispatch" element={<DispatchScreen />} />
           <Route path="/operations" element={<DeliveryOperations />} />
+          <Route path="/inventory" element={<InventoryManagement />} />
+          <Route path="/menu" element={<MenuRotation />} />
         </Route>
         <Route path="*" element={<PageNotFound />} />
       </Routes>
