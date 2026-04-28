@@ -18,18 +18,18 @@ L.Icon.Default.mergeOptions({
 });
 
 const driverIcon = L.divIcon({
-  html: `<div style="background:#b45309;border:2.5px solid white;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,0.25)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg></div>`,
-  iconSize: [36, 36], iconAnchor: [18, 18], className: ''
-});
-
-const orderIcon = L.divIcon({
-  html: `<div style="background:#2563eb;border:2.5px solid white;border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.2)"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>`,
+  html: `<div style="background:#165a34;border:2px solid white;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.25)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="6" cy="18" r="1.5"/><circle cx="18" cy="18" r="1.5"/><path d="M4 6V4h16v2" fill="white"/></svg></div>`,
   iconSize: [32, 32], iconAnchor: [16, 16], className: ''
 });
 
+const orderIcon = L.divIcon({
+  html: `<div style="background:#3b82f6;border:2px solid white;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.2)"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M4 4h16v14c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V4z"/><line x1="8" y1="8" x2="16" y2="8" stroke="white" stroke-width="1.5"/><line x1="8" y1="12" x2="16" y2="12" stroke="white" stroke-width="1.5"/></svg></div>`,
+  iconSize: [28, 28], iconAnchor: [14, 14], className: ''
+});
+
 const selectedDriverIcon = L.divIcon({
-  html: `<div style="background:#16a34a;border:3px solid white;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(22,163,74,0.45)"><svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg></div>`,
-  iconSize: [42, 42], iconAnchor: [21, 21], className: ''
+  html: `<div style="background:#16a34a;border:2.5px solid white;border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(22,163,74,0.4)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="6" cy="18" r="1.5"/><circle cx="18" cy="18" r="1.5"/><path d="M4 6V4h16v2" fill="white"/></svg></div>`,
+  iconSize: [40, 40], iconAnchor: [20, 20], className: ''
 });
 
 const CATEGORY_ICONS = { meat: '🥩', salad: '🥗', drink: '🥤', smoothie: '🍹' };
