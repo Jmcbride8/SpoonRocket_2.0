@@ -16,6 +16,7 @@ export default function InventoryManagement() {
   const [editingCategory, setEditingCategory] = useState(null);
   const [quantities, setQuantities] = useState({});
   const [dailyLevels, setDailyLevels] = useState({});
+  const [carryOverWaste, setCarryOverWaste] = useState({});
   const [wastageModal, setWastageModal] = useState(null);
   const [kpis, setKpis] = useState({ sold: 0, unsold: 0, waste: 0, spoilage: 0, soldCount: 0, unsoldCount: 0, wasteCount: 0, spoilageCount: 0 });
 
@@ -243,7 +244,7 @@ export default function InventoryManagement() {
                            </div>
                            <div className="bg-yellow-100 text-yellow-700 p-2 rounded">
                              <p className="font-semibold">${metrics.unsold.toFixed(0)}</p>
-                             <p className="text-xs">Unsold</p>
+                             <p className="text-xs">Unsold ({metrics.unsoldCount})</p>
                            </div>
                            <div className="bg-orange-100 text-orange-700 p-2 rounded">
                              <p className="font-semibold">${metrics.waste.toFixed(0)}</p>
@@ -254,20 +255,39 @@ export default function InventoryManagement() {
                              <p className="text-xs">Spoilage</p>
                            </div>
                          </div>
-                       </div>
-                       );
-                     })}
-                     </div>
-                     )}
-
-                    <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="flex-1 border-foreground/20 text-foreground hover:bg-foreground/5">
-                    Carry Over
-                    </Button>
-                    <Button size="sm" variant="outline" className="flex-1 border-foreground/20 text-foreground hover:bg-foreground/5">
-                    Mark Waste
-                    </Button>
-                    </div>
+                         {metrics.unsoldCount > 0 && (
+                           <div className="flex gap-2 mt-3">
+                             <div className="flex-1">
+                               <label className="text-xs text-foreground/60 block mb-1">Carry Over</label>
+                               <Input
+                                 type="number"
+                                 min="0"
+                                 max={metrics.unsoldCount}
+                                 value={carryOverWaste[item.id]?.carryOver || ''}
+                                 onChange={e => setCarryOverWaste({ ...carryOverWaste, [item.id]: { ...carryOverWaste[item.id], carryOver: parseInt(e.target.value) || 0 } })}
+                                 placeholder="0"
+                                 className="w-full h-7 bg-background border-foreground/20 text-foreground text-xs text-center"
+                               />
+                             </div>
+                             <div className="flex-1">
+                               <label className="text-xs text-foreground/60 block mb-1">Mark Waste</label>
+                               <Input
+                                 type="number"
+                                 min="0"
+                                 max={metrics.unsoldCount}
+                                 value={carryOverWaste[item.id]?.markWaste || ''}
+                                 onChange={e => setCarryOverWaste({ ...carryOverWaste, [item.id]: { ...carryOverWaste[item.id], markWaste: parseInt(e.target.value) || 0 } })}
+                                 placeholder="0"
+                                 className="w-full h-7 bg-background border-foreground/20 text-foreground text-xs text-center"
+                               />
+                             </div>
+                           </div>
+                         )}
+                         </div>
+                         );
+                         })}
+                         </div>
+                         )}
                     </div>
                     );
                     })}
