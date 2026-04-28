@@ -18,7 +18,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const createDriverIcon = (selected = false) => L.divIcon({
-  html: `<div style="background:#165a34;border:2px solid white;border-radius:50%;width:${selected ? 40 : 32}px;height:${selected ? 40 : 32}px;display:flex;align-items:center;justify-content:center;box-shadow:0 ${selected ? 4 : 2}px ${selected ? 12 : 8}px rgba(0,0,0,0.25)"><svg xmlns="http://www.w3.org/2000/svg" width="${selected ? 18 : 16}" height="${selected ? 18 : 16}" viewBox="0 0 24 24" fill="white"><path d="M3 11h2L7 5h10l2 6h2a2 2 0 0 1 0 4h-1v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-5H9v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5H3a2 2 0 0 1 0-4z"/><circle cx="6.5" cy="17" r="1" fill="white"/><circle cx="17.5" cy="17" r="1" fill="white"/></svg></div>`,
+  html: `<div style="background:#165a34;width:${selected ? 40 : 32}px;height:${selected ? 40 : 32}px;display:flex;align-items:center;justify-content:center;box-shadow:0 ${selected ? 4 : 2}px ${selected ? 12 : 8}px rgba(0,0,0,0.25);clip-path:polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)"><svg xmlns="http://www.w3.org/2000/svg" width="${selected ? 18 : 16}" height="${selected ? 18 : 16}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8L20 12v6h-1v2h-2v-2H7v2H5v-2H4v-6L8 4z"/><circle cx="8.5" cy="15" r="1.5" fill="white"/><circle cx="15.5" cy="15" r="1.5" fill="white"/></svg></div>`,
   iconSize: [selected ? 40 : 32, selected ? 40 : 32], iconAnchor: [selected ? 20 : 16, selected ? 20 : 16], className: ''
 });
 
