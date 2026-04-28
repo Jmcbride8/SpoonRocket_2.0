@@ -43,6 +43,11 @@
     },
     "city": {
       "type": "string"
+    },
+    "daily_inventory_level": {
+      "type": "number",
+      "default": 0,
+      "description": "Daily inventory quantity prepared for this item"
     }
   },
   "required": [

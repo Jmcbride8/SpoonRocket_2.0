@@ -15,6 +15,7 @@ export default function InventoryManagement() {
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [quantities, setQuantities] = useState({});
+  const [dailyLevels, setDailyLevels] = useState({});
   const [wastageModal, setWastageModal] = useState(null);
   const [kpis, setKpis] = useState({ sold: 0, unsold: 0, waste: 0, spoilage: 0, soldCount: 0, unsoldCount: 0, wasteCount: 0, spoilageCount: 0 });
 
@@ -23,10 +24,15 @@ export default function InventoryManagement() {
     try {
       const items = await base44.entities.MenuItem.filter({ menu_date: selectedDate, is_active: true });
       const grouped = {};
+      const levels = {};
       CATEGORIES.forEach(cat => {
         grouped[cat] = items.filter(i => i.category === cat);
       });
+      items.forEach(item => {
+        levels[item.id] = item.daily_inventory_level || 0;
+      });
       setInventory(grouped);
+      setDailyLevels(levels);
 
       // Calculate KPIs
       const [orders, driverInv] = await Promise.all([
@@ -86,19 +92,16 @@ export default function InventoryManagement() {
   useEffect(() => { load(); }, [selectedDate]);
 
   const handleSetMeals = async () => {
-    const menuData = [];
-    for (const [cat, items] of Object.entries(inventory)) {
-      if (items.length > 0 && quantities[cat]) {
-        items.forEach(item => {
-          menuData.push({
-            ...item,
-            quantity_for_day: parseInt(quantities[cat]) || 0,
-          });
-        });
+    for (const [itemId, level] of Object.entries(dailyLevels)) {
+      if (level > 0) {
+        const item = Object.values(inventory).flat().find(i => i.id === itemId);
+        if (item) {
+          await base44.entities.MenuItem.update(itemId, { daily_inventory_level: parseInt(level) || 0 });
+        }
       }
     }
     setShowModal(false);
-    setQuantities({});
+    await load();
   };
 
   const handleWastage = async (category, action) => {
@@ -191,20 +194,27 @@ export default function InventoryManagement() {
                 </div>
 
                 {items.length === 0 ? (
-                  <p className="text-foreground/60 text-sm italic">No items configured</p>
-                ) : (
-                  <div className="space-y-3 mb-4">
-                    {items.map(item => (
-                      <div key={item.id} className="flex items-center justify-between p-3 bg-foreground/3 rounded-lg border border-foreground/10">
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{item.name}</p>
-                          <p className="text-xs text-foreground/60">${item.price}</p>
-                        </div>
-                        <span className="text-sm font-semibold text-foreground">TBD</span>
-                      </div>
-                    ))}
-                    </div>
-                    )}
+                   <p className="text-foreground/60 text-sm italic">No items configured</p>
+                 ) : (
+                   <div className="space-y-3 mb-4">
+                     {items.map(item => (
+                       <div key={item.id} className="flex items-center justify-between p-3 bg-foreground/3 rounded-lg border border-foreground/10">
+                         <div>
+                           <p className="text-sm font-medium text-foreground">{item.name}</p>
+                           <p className="text-xs text-foreground/60">${item.price}</p>
+                         </div>
+                         <Input
+                           type="number"
+                           min="0"
+                           value={dailyLevels[item.id] || ''}
+                           onChange={e => setDailyLevels({ ...dailyLevels, [item.id]: e.target.value })}
+                           placeholder="0"
+                           className="w-16 h-8 bg-background border-foreground/20 text-foreground text-sm text-right"
+                         />
+                       </div>
+                     ))}
+                     </div>
+                     )}
 
                     <div className="flex gap-2">
                     <Button size="sm" variant="outline" className="flex-1 border-foreground/20 text-foreground hover:bg-foreground/5">
@@ -220,33 +230,12 @@ export default function InventoryManagement() {
                     </div>
                     )}
 
-      {/* Set Meals Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
-          <div className="bg-background w-full max-w-md rounded-2xl p-6 shadow-2xl border border-foreground/10" onClick={e => e.stopPropagation()}>
-            <h2 className="font-sans text-xl font-bold mb-5 text-foreground">Set Daily Meals by Category</h2>
-            <div className="space-y-4 mb-6">
-              {CATEGORIES.map(cat => (
-                <div key={cat}>
-                  <label className="text-sm font-medium text-foreground capitalize mb-2 block">{cat}</label>
-                  <Input
-                    type="number"
-                    min="0"
-                    value={quantities[cat] || ''}
-                    onChange={e => setQuantities({ ...quantities, [cat]: e.target.value })}
-                    placeholder="Quantity to prepare"
-                    className="bg-foreground/3 border-foreground/10 text-foreground placeholder-foreground/40"
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1 border-foreground/20 text-foreground hover:bg-foreground/5" onClick={() => setShowModal(false)}>Cancel</Button>
-              <Button className="flex-1 bg-foreground text-background hover:bg-foreground/90" onClick={handleSetMeals}>Set Meals</Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Save Button */}
+      <div className="mt-8 flex gap-3">
+        <Button className="gap-2 bg-foreground text-background hover:bg-foreground/90" onClick={handleSetMeals}>
+          <CheckCircle className="w-4 h-4" /> Save Daily Inventory Levels
+        </Button>
+      </div>
     </div>
   );
 }
