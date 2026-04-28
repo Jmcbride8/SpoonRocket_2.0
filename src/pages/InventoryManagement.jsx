@@ -282,12 +282,10 @@ export default function InventoryManagement() {
                            <div className="bg-green-100 text-green-700 p-2 rounded">
                              <p className="font-semibold">${metrics.sold.toFixed(0)}</p>
                              <p className="text-xs">Sold Value</p>
-                             <p className="text-xs mt-1">COGS: ${metrics.soldCogs.toFixed(0)}</p>
                            </div>
                            <div className="bg-yellow-100 text-yellow-700 p-2 rounded">
                              <p className="font-semibold">${metrics.unsold.toFixed(0)}</p>
                              <p className="text-xs">Unsold ({metrics.unsoldCount})</p>
-                             <p className="text-xs mt-1">COGS: ${metrics.unsoldCogs.toFixed(0)}</p>
                            </div>
                            <div className="bg-orange-100 text-orange-700 p-2 rounded">
                              <p className="font-semibold">${metrics.waste.toFixed(0)}</p>
