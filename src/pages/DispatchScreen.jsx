@@ -136,29 +136,29 @@ export default function DispatchScreen() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-screen bg-foreground">
       {/* Top bar */}
-      <div className="px-6 py-4 border-b border-border bg-card flex items-center justify-between shrink-0">
+      <div className="px-6 py-4 border-b border-border bg-foreground flex items-center justify-between shrink-0">
         <div>
-          <h1 className="font-playfair text-xl font-bold text-foreground">Dispatch</h1>
-          <p className="text-xs text-muted-foreground">{drivers.length} drivers active · {orders.length} pending orders</p>
+          <h1 className="font-sans text-xl font-bold text-background">Dispatch</h1>
+          <p className="text-xs text-background/60">{drivers.length} active · {orders.length} pending</p>
         </div>
         <div className="flex items-center gap-3">
-          {selectedDriver && (
-            <div className="flex items-center gap-2 bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-sm font-medium text-green-800">{selectedDriver.full_name} selected</span>
-              <button onClick={() => setSelectedDriver(null)} className="text-green-600 hover:text-green-800 ml-1 text-lg leading-none">&times;</button>
-            </div>
-          )}
-          <Button variant="outline" size="sm" onClick={load}>Refresh</Button>
+           {selectedDriver && (
+             <div className="flex items-center gap-2 bg-background border border-background/20 px-3 py-1.5 rounded-lg">
+               <div className="w-2 h-2 rounded-full bg-background animate-pulse" />
+               <span className="text-sm font-medium text-background">{selectedDriver.full_name}</span>
+               <button onClick={() => setSelectedDriver(null)} className="text-background hover:opacity-70 ml-1 text-lg leading-none">&times;</button>
+             </div>
+           )}
+           <Button className="bg-background text-foreground hover:bg-background/90" size="sm" onClick={load}>Refresh</Button>
         </div>
       </div>
 
       {/* Mobile tabs */}
-      <div className="md:hidden flex border-b border-border bg-card">
+      <div className="md:hidden flex border-b border-border bg-foreground">
         {['map', 'drivers', 'orders'].map(t => (
-          <button key={t} onClick={() => setTab(t)} className={`flex-1 py-2 text-sm font-medium capitalize transition-colors ${tab === t ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}>
+          <button key={t} onClick={() => setTab(t)} className={`flex-1 py-2 text-sm font-medium capitalize transition-colors ${tab === t ? 'border-b-2 border-background text-background' : 'text-background/60'}`}>
             {t}
           </button>
         ))}
@@ -238,39 +238,39 @@ export default function DispatchScreen() {
           </MapContainer>
 
           {!selectedDriver && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-card border border-border px-4 py-2 rounded-full text-sm text-muted-foreground shadow-md pointer-events-none">
-              Select a driver from the panel, then click an order to assign
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-background border border-foreground px-4 py-2 rounded-full text-sm text-foreground shadow-md pointer-events-none">
+              Select a driver, then click an order to assign
             </div>
           )}
         </div>
 
         {/* Right Panel */}
-        <div className={`w-full md:w-80 border-l border-border bg-card flex flex-col overflow-hidden ${tab === 'map' ? 'hidden md:flex' : tab === 'map' ? 'hidden' : 'flex'}`}>
+        <div className={`w-full md:w-80 border-l border-border bg-background flex flex-col overflow-hidden ${tab === 'map' ? 'hidden md:flex' : tab === 'map' ? 'hidden' : 'flex'}`}>
 
           {/* Drivers with inventory */}
           <div className={tab === 'orders' ? 'hidden md:block' : 'block'}>
-            <div className="px-4 py-3 border-b border-border">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Active Drivers</p>
+            <div className="px-4 py-3 border-b border-border bg-foreground">
+              <p className="text-xs font-semibold text-background/60 uppercase tracking-wide">Active Drivers</p>
             </div>
             <div className="overflow-y-auto max-h-72 md:max-h-80">
               {drivers.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">No drivers on shift</p>
+                <p className="text-sm text-foreground text-center py-6">No drivers on shift</p>
               ) : drivers.map(driver => (
                 <button
                   key={driver.id}
                   onClick={() => setSelectedDriver(selectedDriver?.id === driver.id ? null : driver)}
-                  className={`w-full text-left px-4 py-3 border-b border-border/50 transition-colors hover:bg-secondary/50 ${selectedDriver?.id === driver.id ? 'bg-primary/10 border-l-2 border-l-primary' : ''}`}
+                  className={`w-full text-left px-4 py-3 border-b border-border/50 transition-colors hover:bg-background/90 ${selectedDriver?.id === driver.id ? 'bg-background/80 border-l-2 border-l-foreground' : 'bg-background'}`}
                 >
                   <div className="flex items-center gap-3 mb-1.5">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${selectedDriver?.id === driver.id ? 'bg-primary' : 'bg-secondary'}`}>
-                      <Truck className={`w-4 h-4 ${selectedDriver?.id === driver.id ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${selectedDriver?.id === driver.id ? 'bg-foreground' : 'bg-foreground/10'}`}>
+                      <Truck className={`w-4 h-4 ${selectedDriver?.id === driver.id ? 'text-background' : 'text-foreground'}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground">{driver.full_name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{driver.city} · {driver.vehicle_plate}</p>
+                      <p className="text-xs text-foreground/60 truncate">{driver.city} · {driver.vehicle_plate}</p>
                     </div>
                     {selectedDriver?.id === driver.id && (
-                      <div className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                      <div className="w-2 h-2 rounded-full bg-background shrink-0" />
                     )}
                   </div>
                   {/* Inventory mini-bars */}
@@ -281,36 +281,36 @@ export default function DispatchScreen() {
           </div>
 
           {/* Orders with item breakdown */}
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <div className="px-4 py-3 border-b border-border">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Pending Orders</p>
+          <div className="flex-1 overflow-hidden flex flex-col bg-background">
+            <div className="px-4 py-3 border-b border-border bg-foreground">
+              <p className="text-xs font-semibold text-background/60 uppercase tracking-wide">Pending Orders</p>
             </div>
             <div className="overflow-y-auto flex-1">
               {orders.length === 0 ? (
                 <div className="text-center py-8">
-                  <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">All orders handled!</p>
+                  <CheckCircle className="w-8 h-8 text-background mx-auto mb-2" />
+                  <p className="text-sm text-foreground">All orders handled!</p>
                 </div>
               ) : orders.map(order => (
-                <div key={order.id} className="px-4 py-3 border-b border-border/50">
+                <div key={order.id} className="px-4 py-3 border-b border-border/50 bg-background hover:bg-background/80 transition-colors">
                   {/* Customer + total */}
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <p className="text-sm font-semibold text-foreground">{order.customer_name || 'Customer'}</p>
-                    <span className="font-bold text-sm text-primary whitespace-nowrap">${order.total?.toFixed(2)}</span>
+                    <span className="font-bold text-sm text-foreground whitespace-nowrap">${order.total?.toFixed(2)}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{order.delivery_address}</p>
+                  <p className="text-xs text-foreground/60 mb-2 line-clamp-1">{order.delivery_address}</p>
 
                   {/* Order items breakdown */}
-                  <div className="bg-secondary/50 rounded-lg px-2.5 py-2 mb-2 space-y-1">
+                  <div className="bg-foreground/5 rounded-lg px-2.5 py-2 mb-2 space-y-1">
                     {(order.items || []).map((item, i) => {
                       const CatIcon = CATEGORY_ICON_COMPONENTS[item.category] || Beef;
                       return (
                         <div key={i} className="flex items-center justify-between text-xs">
                           <span className="flex items-center gap-1.5 text-foreground">
-                            <CatIcon className="w-3 h-3 text-primary shrink-0" />
+                            <CatIcon className="w-3 h-3 text-foreground shrink-0" />
                             <span className="truncate max-w-[120px]">{item.name}</span>
                           </span>
-                          <span className="text-muted-foreground shrink-0">×{item.quantity} · ${(item.price * item.quantity).toFixed(2)}</span>
+                          <span className="text-foreground/60 shrink-0">×{item.quantity}</span>
                         </div>
                       );
                     })}
@@ -318,18 +318,18 @@ export default function DispatchScreen() {
 
                   {/* Special instructions */}
                   {order.special_instructions && (
-                    <p className="text-xs text-muted-foreground italic mb-2">📝 {order.special_instructions}</p>
+                    <p className="text-xs text-foreground/60 italic mb-2">📝 {order.special_instructions}</p>
                   )}
 
                   <div className="flex items-center justify-between">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[order.status]}`}>
-                      {order.status}
+                      {order.status.replace('_', ' ')}
                     </span>
                     {selectedDriver && order.status === 'pending' && (
                       <button
                         onClick={() => assignOrder(order)}
                         disabled={assigning === order.id}
-                        className="text-xs bg-primary text-primary-foreground px-3 py-1 rounded-full font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                        className="text-xs bg-foreground text-background px-3 py-1 rounded-full font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50"
                       >
                         {assigning === order.id ? '...' : 'Assign'}
                       </button>
