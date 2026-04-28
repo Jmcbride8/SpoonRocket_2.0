@@ -36,77 +36,51 @@ export default function InventoryManagement() {
       setDailyLevels(levels);
 
       // Calculate KPIs
-      const [orders, driverInv] = await Promise.all([
-        base44.entities.Order.filter({ order_date: selectedDate }),
-        base44.entities.DriverInventory.filter({ shift_date: selectedDate }),
-      ]);
+      const orders = await base44.entities.Order.filter({ order_date: selectedDate });
 
       let soldAmount = 0, soldCogs = 0, soldCount = 0, unsoldAmount = 0, unsoldCogs = 0, unsoldCount = 0, wasteAmount = 0, wasteCount = 0, shrinkageAmount = 0, shrinkageCount = 0;
       const itemMetrics = {};
       const itemDetails = {};
-      Object.values(items).forEach(item => {
+      const soldQtyByItem = {};
+
+      items.forEach(item => {
         itemDetails[item.id] = item;
+        itemMetrics[item.id] = { sold: 0, soldCogs: 0, soldCount: 0, unsold: 0, unsoldCogs: 0, unsoldCount: 0, waste: 0, wasteCount: 0, shrinkage: 0, shrinkageCount: 0 };
+        soldQtyByItem[item.id] = 0;
       });
 
-      // Orders - sold items
+      // Calculate sold items from orders
       orders.forEach(order => {
         (order.items || []).forEach(item => {
           const itemDetail = itemDetails[item.menu_item_id];
-          const itemCogs = itemDetail?.cogs || 0;
-          soldAmount += item.price * item.quantity;
-          soldCogs += itemCogs * item.quantity;
-          soldCount += item.quantity;
-          if (!itemMetrics[item.menu_item_id]) {
-            itemMetrics[item.menu_item_id] = { sold: 0, soldCogs: 0, soldCount: 0, unsold: 0, unsoldCogs: 0, unsoldCount: 0, waste: 0, wasteCount: 0, shrinkage: 0, shrinkageCount: 0 };
+          if (itemDetail) {
+            const itemCogs = itemDetail.cogs || 0;
+            soldAmount += item.price * item.quantity;
+            soldCogs += itemCogs * item.quantity;
+            soldCount += item.quantity;
+            soldQtyByItem[item.menu_item_id] = (soldQtyByItem[item.menu_item_id] || 0) + item.quantity;
+            itemMetrics[item.menu_item_id].sold += item.price * item.quantity;
+            itemMetrics[item.menu_item_id].soldCogs += itemCogs * item.quantity;
+            itemMetrics[item.menu_item_id].soldCount += item.quantity;
           }
-          itemMetrics[item.menu_item_id].sold += item.price * item.quantity;
-          itemMetrics[item.menu_item_id].soldCogs += itemCogs * item.quantity;
-          itemMetrics[item.menu_item_id].soldCount += item.quantity;
         });
       });
 
-      // Driver inventory - unsold, waste, shrinkage
-      driverInv.forEach(inv => {
-        const itemDetail = itemDetails[inv.menu_item_id];
-        const itemCogs = itemDetail?.cogs || 0;
-        const unsoldQty = (inv.quantity_loaded || 0) - (inv.quantity_sold || 0) - (inv.quantity_spoiled || 0);
-        if (!itemMetrics[inv.menu_item_id]) {
-          itemMetrics[inv.menu_item_id] = { sold: 0, soldCogs: 0, soldCount: 0, unsold: 0, unsoldCogs: 0, unsoldCount: 0, waste: 0, wasteCount: 0, shrinkage: 0, shrinkageCount: 0 };
-        }
+      // Calculate unsold from daily_inventory_level
+      items.forEach(item => {
+        const prepared = item.daily_inventory_level || 0;
+        const sold = soldQtyByItem[item.id] || 0;
+        const unsoldQty = prepared - sold;
+
         if (unsoldQty > 0) {
-          unsoldAmount += inv.price * unsoldQty;
+          const itemCogs = item.cogs || 0;
+          unsoldAmount += item.price * unsoldQty;
           unsoldCogs += itemCogs * unsoldQty;
           unsoldCount += unsoldQty;
-          itemMetrics[inv.menu_item_id].unsold += inv.price * unsoldQty;
-          itemMetrics[inv.menu_item_id].unsoldCogs += itemCogs * unsoldQty;
-          itemMetrics[inv.menu_item_id].unsoldCount += unsoldQty;
+          itemMetrics[item.id].unsold += item.price * unsoldQty;
+          itemMetrics[item.id].unsoldCogs += itemCogs * unsoldQty;
+          itemMetrics[item.id].unsoldCount += unsoldQty;
         }
-        if (inv.quantity_spoiled > 0) {
-          shrinkageAmount += inv.price * inv.quantity_spoiled;
-          shrinkageCount += inv.quantity_spoiled;
-          itemMetrics[inv.menu_item_id].shrinkage += inv.price * inv.quantity_spoiled;
-          itemMetrics[inv.menu_item_id].shrinkageCount += inv.quantity_spoiled;
-        }
-      });
-
-      // Waste (loaded but never sold or spoiled)
-      Object.values(grouped).forEach(catItems => {
-        catItems.forEach(item => {
-          const loaded = driverInv.filter(d => d.menu_item_id === item.id);
-          const totalLoaded = loaded.reduce((sum, d) => sum + (d.quantity_loaded || 0), 0);
-          const totalSold = loaded.reduce((sum, d) => sum + (d.quantity_sold || 0), 0);
-          const totalSpoiled = loaded.reduce((sum, d) => sum + (d.quantity_spoiled || 0), 0);
-          const waste = totalLoaded - totalSold - totalSpoiled;
-          if (waste > 0) {
-            wasteAmount += item.price * waste;
-            wasteCount += waste;
-            if (!itemMetrics[item.id]) {
-              itemMetrics[item.id] = { sold: 0, soldCount: 0, unsold: 0, unsoldCount: 0, waste: 0, wasteCount: 0, spoilage: 0, spoilageCount: 0 };
-            }
-            itemMetrics[item.id].waste += item.price * waste;
-            itemMetrics[item.id].wasteCount += waste;
-          }
-        });
       });
 
       setKpis({ sold: soldAmount, soldCogs, unsold: unsoldAmount, unsoldCogs, waste: wasteAmount, shrinkage: shrinkageAmount, soldCount, unsoldCount, wasteCount, shrinkageCount });
