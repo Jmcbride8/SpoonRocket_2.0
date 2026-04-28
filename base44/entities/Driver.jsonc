@@ -1,0 +1,57 @@
+{
+  "name": "Driver",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "vehicle_plate": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "off_duty",
+        "on_shift",
+        "delivering"
+      ],
+      "default": "off_duty"
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    },
+    "last_location_update": {
+      "type": "string"
+    },
+    "shift_start": {
+      "type": "string"
+    },
+    "shift_end": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "number"
+    },
+    "total_deliveries": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "user_email",
+    "full_name",
+    "city"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "Complaint",
+  "type": "object",
+  "properties": {
+    "customer_email": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "order_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "late_delivery",
+        "wrong_order",
+        "food_quality",
+        "driver_behavior",
+        "other"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "under_review",
+        "resolved",
+        "closed"
+      ],
+      "default": "open"
+    },
+    "resolution": {
+      "type": "string"
+    },
+    "resolved_by": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_email",
+    "type",
+    "description"
+  ]
+}

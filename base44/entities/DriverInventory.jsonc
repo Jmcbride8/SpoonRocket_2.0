@@ -1,0 +1,55 @@
+{
+  "name": "DriverInventory",
+  "type": "object",
+  "properties": {
+    "driver_id": {
+      "type": "string"
+    },
+    "menu_item_id": {
+      "type": "string"
+    },
+    "menu_item_name": {
+      "type": "string"
+    },
+    "menu_item_category": {
+      "type": "string"
+    },
+    "quantity_loaded": {
+      "type": "number",
+      "default": 0
+    },
+    "quantity_sold": {
+      "type": "number",
+      "default": 0
+    },
+    "quantity_spoiled": {
+      "type": "number",
+      "default": 0
+    },
+    "spoilage_reason": {
+      "type": "string"
+    },
+    "spoilage_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "pending_review",
+        "approved",
+        "rejected"
+      ],
+      "default": "none"
+    },
+    "shift_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "price": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "driver_id",
+    "menu_item_id",
+    "shift_date"
+  ]
+}

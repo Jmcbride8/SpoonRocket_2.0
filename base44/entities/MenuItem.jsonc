@@ -1,0 +1,50 @@
+{
+  "name": "MenuItem",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "meat",
+        "salad",
+        "drink",
+        "smoothie"
+      ]
+    },
+    "price": {
+      "type": "number"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "calories": {
+      "type": "number"
+    },
+    "allergens": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "menu_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "city": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "price",
+    "menu_date"
+  ]
+}
