@@ -192,20 +192,19 @@ export default function MenuManagement() {
               <div>
                 <label className="text-xs text-muted-foreground mb-2 block">Meal Image</label>
                 {form.image_url ? (
-                  <div className="relative group">
-                    <img src={form.image_url} alt="preview" className="w-full h-32 object-cover rounded-lg" />
+                  <div className="relative group inline-block">
+                    <img src={form.image_url} alt="preview" className="w-20 h-20 object-cover rounded-lg" />
                     <button
                       type="button"
                       onClick={() => setForm(p => ({...p, image_url: ''}))}
-                      className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-3 h-3" />
                     </button>
                   </div>
                 ) : (
-                  <label className="flex items-center justify-center gap-2 w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
-                    <Upload className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{uploading ? 'Uploading...' : 'Click to upload'}</span>
+                  <label className="flex items-center justify-center gap-2 w-20 h-20 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <Upload className="w-3.5 h-3.5 text-muted-foreground" />
                     <input
                       type="file"
                       accept="image/*"
@@ -215,6 +214,7 @@ export default function MenuManagement() {
                     />
                   </label>
                 )}
+                <p className="text-xs text-muted-foreground mt-1">{uploading ? 'Uploading...' : 'JPG, PNG'}</p>
               </div>
               <Input placeholder="Allergens" value={form.allergens} onChange={e => setForm(p => ({...p, allergens: e.target.value}))} />
               <div className="grid grid-cols-2 gap-3">
