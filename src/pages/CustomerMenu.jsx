@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { ShoppingCart, Plus, Minus, X, ChefHat, Star, Leaf, Droplets, Zap } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ChefHat, Beef, Salad, GlassWater, Blend } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
+const CATEGORY_ICON_COMPONENTS = { meat: Beef, salad: Salad, drink: GlassWater, smoothie: Blend };
 const CATEGORY_ICONS = {
   meat: '🥩',
   salad: '🥗',
@@ -139,7 +140,7 @@ export default function CustomerMenu() {
               return (
                 <div key={cat}>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xl">{CATEGORY_ICONS[cat]}</span>
+                    {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-4 h-4 text-primary" />; })()}
                     <h2 className="font-semibold text-foreground">{CATEGORY_LABELS[cat]}</h2>
                   </div>
                   <div className="space-y-3">
@@ -149,8 +150,8 @@ export default function CustomerMenu() {
                           {item.image_url ? (
                             <img src={item.image_url} alt={item.name} className="w-24 h-24 object-cover rounded-xl flex-shrink-0" />
                           ) : (
-                            <div className="w-24 h-24 bg-secondary rounded-xl flex items-center justify-center flex-shrink-0 text-3xl">
-                              {CATEGORY_ICONS[cat]}
+                            <div className="w-24 h-24 bg-secondary rounded-xl flex items-center justify-center flex-shrink-0">
+                              {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-9 h-9 text-muted-foreground" />; })()}
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
@@ -223,7 +224,9 @@ export default function CustomerMenu() {
               {cartItems.map(item => (
                 <div key={item.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-lg">{CATEGORY_ICONS[item.category]}</span>
+                    <div className="w-7 h-7 bg-secondary rounded-lg flex items-center justify-center">
+                      {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[item.category]; return <CatIcon className="w-3.5 h-3.5 text-primary" />; })()}
+                    </div>
                     <div>
                       <p className="text-sm font-medium">{item.name}</p>
                       <p className="text-xs text-muted-foreground">${item.price.toFixed(2)} each</p>

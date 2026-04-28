@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Pencil, Trash2, ChefHat, Calendar, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChefHat, Calendar, ToggleLeft, ToggleRight, Beef, Salad, GlassWater, Blend } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { format } from 'date-fns';
 
 const CATEGORIES = ['meat', 'salad', 'drink', 'smoothie'];
+const CATEGORY_ICON_COMPONENTS = { meat: Beef, salad: Salad, drink: GlassWater, smoothie: Blend };
 const CATEGORY_ICONS = { meat: '🥩', salad: '🥗', drink: '🥤', smoothie: '🍹' };
 const CATEGORY_COLORS = {
   meat: 'bg-orange-100 text-orange-700 border-orange-200',
@@ -90,13 +91,14 @@ export default function MenuManagement() {
       {/* Summary badges */}
       <div className="flex flex-wrap gap-2 mb-6">
         {CATEGORIES.map(cat => {
-          const count = items.filter(i => i.category === cat).length;
-          return (
-            <div key={cat} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${count > 0 ? CATEGORY_COLORS[cat] : 'bg-muted text-muted-foreground border-border'}`}>
-              {CATEGORY_ICONS[cat]} {cat.charAt(0).toUpperCase() + cat.slice(1)} {count > 0 ? '✓' : '—'}
-            </div>
-          );
-        })}
+            const count = items.filter(i => i.category === cat).length;
+            const CatIcon = CATEGORY_ICON_COMPONENTS[cat];
+            return (
+              <div key={cat} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${count > 0 ? CATEGORY_COLORS[cat] : 'bg-muted text-muted-foreground border-border'}`}>
+                <CatIcon className="w-3 h-3" /> {cat.charAt(0).toUpperCase() + cat.slice(1)} {count > 0 ? '✓' : '—'}
+              </div>
+            );
+          })}
       </div>
 
       {loading ? (
@@ -118,8 +120,8 @@ export default function MenuManagement() {
                 {item.image_url ? (
                   <img src={item.image_url} alt={item.name} className="w-20 h-20 object-cover rounded-xl flex-shrink-0" />
                 ) : (
-                  <div className="w-20 h-20 bg-secondary rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
-                    {CATEGORY_ICONS[item.category]}
+                  <div className="w-20 h-20 bg-secondary rounded-xl flex items-center justify-center flex-shrink-0">
+                    {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[item.category]; return <CatIcon className="w-7 h-7 text-muted-foreground" />; })()}
                   </div>
                 )}
                 <div className="flex-1 min-w-0">

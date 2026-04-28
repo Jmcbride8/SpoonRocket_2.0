@@ -4,7 +4,9 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Button } from '@/components/ui/button';
-import { Truck, CheckCircle } from 'lucide-react';
+import { Truck, CheckCircle, Beef, Salad, GlassWater, Blend } from 'lucide-react';
+
+const CATEGORY_ICON_COMPONENTS = { meat: Beef, salad: Salad, drink: GlassWater, smoothie: Blend };
 import { format } from 'date-fns';
 
 // Fix leaflet default icons
@@ -16,21 +18,28 @@ L.Icon.Default.mergeOptions({
 });
 
 const driverIcon = L.divIcon({
-  html: `<div style="background:#b45309;border:2px solid white;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 8px rgba(0,0,0,0.3)">🚗</div>`,
+  html: `<div style="background:#b45309;border:2.5px solid white;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,0.25)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg></div>`,
   iconSize: [36, 36], iconAnchor: [18, 18], className: ''
 });
 
 const orderIcon = L.divIcon({
-  html: `<div style="background:#2563eb;border:2px solid white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.25)">📦</div>`,
+  html: `<div style="background:#2563eb;border:2.5px solid white;border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.2)"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>`,
   iconSize: [32, 32], iconAnchor: [16, 16], className: ''
 });
 
 const selectedDriverIcon = L.divIcon({
-  html: `<div style="background:#16a34a;border:3px solid white;border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(0,0,0,0.4)">🚗</div>`,
+  html: `<div style="background:#16a34a;border:3px solid white;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(22,163,74,0.45)"><svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg></div>`,
   iconSize: [42, 42], iconAnchor: [21, 21], className: ''
 });
 
 const CATEGORY_ICONS = { meat: '🥩', salad: '🥗', drink: '🥤', smoothie: '🍹' };
+// SVG icon strings for map popups (no emoji in map DOM)
+const CATEGORY_SVG = {
+  meat: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.6 6.62c-1.44 0-2.8.56-3.77 1.53L12 10.97l-2.71-2.72-.1-.08a4.43 4.43 0 0 0-6.18 0 4.43 4.43 0 0 0 0 6.19 4.43 4.43 0 0 0 6.18 0l2.71-2.71 2.83 2.83a5.27 5.27 0 0 0 3.77 1.53A5.33 5.33 0 0 0 24 10.67a5.33 5.33 0 0 0-5.4-4.05z"/></svg>`,
+  salad: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>`,
+  drink: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>`,
+  smoothie: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/></svg>`,
+};
 
 const STATUS_COLORS = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -98,9 +107,10 @@ export default function DispatchScreen() {
         {inv.map(item => {
           const remaining = (item.quantity_loaded || 0) - (item.quantity_sold || 0) - (item.quantity_spoiled || 0);
           const pct = item.quantity_loaded > 0 ? remaining / item.quantity_loaded : 0;
+          const CatIcon = CATEGORY_ICON_COMPONENTS[item.menu_item_category] || Truck;
           return (
             <div key={item.id} className="flex flex-col items-center gap-0.5">
-              <span className="text-sm">{CATEGORY_ICONS[item.menu_item_category] || '📦'}</span>
+              <CatIcon className="w-3.5 h-3.5 text-muted-foreground" />
               <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${pct > 0.5 ? 'bg-green-500' : pct > 0.2 ? 'bg-yellow-500' : 'bg-red-500'}`}
@@ -170,7 +180,7 @@ export default function DispatchScreen() {
                             const rem = (item.quantity_loaded || 0) - (item.quantity_sold || 0) - (item.quantity_spoiled || 0);
                             return (
                               <div key={item.id} className="flex items-center justify-between gap-2">
-                                <span className="text-xs">{CATEGORY_ICONS[item.menu_item_category]} {item.menu_item_name}</span>
+                                <span className="text-xs capitalize text-gray-700">{item.menu_item_category}: {item.menu_item_name}</span>
                                 <span className={`text-xs font-bold ${rem === 0 ? 'text-red-500' : rem <= 2 ? 'text-yellow-600' : 'text-green-600'}`}>{rem}</span>
                               </div>
                             );
@@ -196,7 +206,7 @@ export default function DispatchScreen() {
                       <div className="flex flex-col gap-0.5 mb-2">
                         {(order.items || []).map((item, i) => (
                           <div key={i} className="flex items-center justify-between text-xs">
-                            <span>{CATEGORY_ICONS[item.category]} {item.name}</span>
+                            <span className="text-gray-700">{item.name}</span>
                             <span className="text-gray-500 ml-2">×{item.quantity}</span>
                           </div>
                         ))}
@@ -283,15 +293,18 @@ export default function DispatchScreen() {
 
                   {/* Order items breakdown */}
                   <div className="bg-secondary/50 rounded-lg px-2.5 py-2 mb-2 space-y-1">
-                    {(order.items || []).map((item, i) => (
-                      <div key={i} className="flex items-center justify-between text-xs">
-                        <span className="flex items-center gap-1.5 text-foreground">
-                          <span>{CATEGORY_ICONS[item.category]}</span>
-                          <span className="truncate max-w-[120px]">{item.name}</span>
-                        </span>
-                        <span className="text-muted-foreground shrink-0">×{item.quantity} · ${(item.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                    ))}
+                    {(order.items || []).map((item, i) => {
+                      const CatIcon = CATEGORY_ICON_COMPONENTS[item.category] || Beef;
+                      return (
+                        <div key={i} className="flex items-center justify-between text-xs">
+                          <span className="flex items-center gap-1.5 text-foreground">
+                            <CatIcon className="w-3 h-3 text-primary shrink-0" />
+                            <span className="truncate max-w-[120px]">{item.name}</span>
+                          </span>
+                          <span className="text-muted-foreground shrink-0">×{item.quantity} · ${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {/* Special instructions */}
