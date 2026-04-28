@@ -302,6 +302,8 @@ export default function DeliveryOperations() {
                 </div>
                 ) : null
                 })()}
+                </div>
+                )}
 
                 {tab === 'schedules' && (
         <div className="space-y-3">
