@@ -240,16 +240,16 @@ export default function DeliveryOperations() {
                 </div>
               )}
                    </div>
-                 ))}
-               </div>
-              ) : null;
-              })()}
+                   ))}
+                   </div>
+                   ) : null
+                   })()}
 
-              {/* Other Drivers */}
-              {(() => {
-              const otherDrivers = drivers.filter(d => !['on_shift', 'delivering'].includes(d.status));
-              return otherDrivers.length > 0 ? (
-              <div>
+                   {/* Other Drivers */}
+                   {(() => {
+                   const otherDrivers = drivers.filter(d => !['on_shift', 'delivering'].includes(d.status));
+                   return otherDrivers.length > 0 ? (
+                   <div>
                 <h3 className="text-sm font-semibold text-foreground mb-3">Other Drivers ({otherDrivers.length})</h3>
                 <div className="space-y-3">
                   {otherDrivers.map(driver => (
@@ -300,10 +300,10 @@ export default function DeliveryOperations() {
                     </div>
                   ))}
                 </div>
-              ) : null;
-              })()}
+                ) : null
+                })()}
 
-      {tab === 'schedules' && (
+                {tab === 'schedules' && (
         <div className="space-y-3">
           {schedules.length === 0 ? (
             <div className="text-center py-12 border-2 border-dashed border-foreground/10 rounded-2xl">
