@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Package, Plus, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Package, Plus, Trash2, CheckCircle, AlertCircle, TrendingUp, AlertTriangle, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,6 +16,7 @@ export default function InventoryManagement() {
   const [editingCategory, setEditingCategory] = useState(null);
   const [quantities, setQuantities] = useState({});
   const [wastageModal, setWastageModal] = useState(null);
+  const [kpis, setKpis] = useState({ sold: 0, unsold: 0, waste: 0, spoilage: 0, soldCount: 0, unsoldCount: 0, wasteCount: 0, spoilageCount: 0 });
 
   const load = async () => {
     setLoading(true);
@@ -26,11 +27,58 @@ export default function InventoryManagement() {
         grouped[cat] = items.filter(i => i.category === cat);
       });
       setInventory(grouped);
+
+      // Calculate KPIs
+      const [orders, driverInv] = await Promise.all([
+        base44.entities.Order.filter({ order_date: selectedDate }),
+        base44.entities.DriverInventory.filter({ shift_date: selectedDate }),
+      ]);
+
+      let soldAmount = 0, soldCount = 0, unsoldAmount = 0, unsoldCount = 0, wasteAmount = 0, wasteCount = 0, spoilageAmount = 0, spoilageCount = 0;
+
+      // Orders - sold items
+      orders.forEach(order => {
+        (order.items || []).forEach(item => {
+          soldAmount += item.price * item.quantity;
+          soldCount += item.quantity;
+        });
+      });
+
+      // Driver inventory - unsold, waste, spoilage
+      driverInv.forEach(inv => {
+        const unsoldQty = (inv.quantity_loaded || 0) - (inv.quantity_sold || 0) - (inv.quantity_spoiled || 0);
+        if (unsoldQty > 0) {
+          unsoldAmount += inv.price * unsoldQty;
+          unsoldCount += unsoldQty;
+        }
+        if (inv.quantity_spoiled > 0) {
+          spoilageAmount += inv.price * inv.quantity_spoiled;
+          spoilageCount += inv.quantity_spoiled;
+        }
+      });
+
+      // Waste (loaded but never sold or spoiled)
+      Object.values(grouped).forEach(catItems => {
+        catItems.forEach(item => {
+          const loaded = driverInv.filter(d => d.menu_item_id === item.id);
+          const totalLoaded = loaded.reduce((sum, d) => sum + (d.quantity_loaded || 0), 0);
+          const totalSold = loaded.reduce((sum, d) => sum + (d.quantity_sold || 0), 0);
+          const totalSpoiled = loaded.reduce((sum, d) => sum + (d.quantity_spoiled || 0), 0);
+          const waste = totalLoaded - totalSold - totalSpoiled;
+          if (waste > 0) {
+            wasteAmount += item.price * waste;
+            wasteCount += waste;
+          }
+        });
+      });
+
+      setKpis({ sold: soldAmount, unsold: unsoldAmount, waste: wasteAmount, spoilage: spoilageAmount, soldCount, unsoldCount, wasteCount, spoilageCount });
     } catch (error) {
       console.error('Failed to load inventory:', error);
       const grouped = {};
       CATEGORIES.forEach(cat => { grouped[cat] = []; });
       setInventory(grouped);
+      setKpis({ sold: 0, unsold: 0, waste: 0, spoilage: 0, soldCount: 0, unsoldCount: 0, wasteCount: 0, spoilageCount: 0 });
     }
     setLoading(false);
   };
@@ -82,6 +130,47 @@ export default function InventoryManagement() {
           <Plus className="w-4 h-4" /> Set Daily Meals
         </Button>
       </div>
+
+      {/* KPI Cards */}
+      {!loading && (
+        <div className="grid md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-background border border-foreground/10 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-foreground/60 uppercase">Sold</p>
+              <TrendingUp className="w-4 h-4 text-green-600" />
+            </div>
+            <p className="text-2xl font-bold text-foreground mb-1">${kpis.sold.toFixed(2)}</p>
+            <p className="text-xs text-foreground/60">{kpis.soldCount} items</p>
+          </div>
+
+          <div className="bg-background border border-foreground/10 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-foreground/60 uppercase">Unsold</p>
+              <DollarSign className="w-4 h-4 text-yellow-600" />
+            </div>
+            <p className="text-2xl font-bold text-foreground mb-1">${kpis.unsold.toFixed(2)}</p>
+            <p className="text-xs text-foreground/60">{kpis.unsoldCount} items</p>
+          </div>
+
+          <div className="bg-background border border-foreground/10 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-foreground/60 uppercase">Waste</p>
+              <AlertTriangle className="w-4 h-4 text-orange-600" />
+            </div>
+            <p className="text-2xl font-bold text-foreground mb-1">${kpis.waste.toFixed(2)}</p>
+            <p className="text-xs text-foreground/60">{kpis.wasteCount} items</p>
+          </div>
+
+          <div className="bg-background border border-foreground/10 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-foreground/60 uppercase">Spoilage</p>
+              <AlertTriangle className="w-4 h-4 text-red-600" />
+            </div>
+            <p className="text-2xl font-bold text-foreground mb-1">${kpis.spoilage.toFixed(2)}</p>
+            <p className="text-xs text-foreground/60">{kpis.spoilageCount} items</p>
+          </div>
+        </div>
+      )}
 
       {/* Inventory Grid */}
       {loading ? (
