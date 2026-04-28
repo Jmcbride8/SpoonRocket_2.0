@@ -138,10 +138,28 @@ export default function InventoryManagement() {
     await load();
   };
 
-  const handleWastage = async (category, action) => {
-    // Mark as waste or carry over
-    console.log(`${action} ${category} meals`);
-    setWastageModal(null);
+  const handleSaveCarryOverWaste = async () => {
+    // Get all driver inventory records for this date and update based on carry over/waste inputs
+    const driverInv = await base44.entities.DriverInventory.filter({ shift_date: selectedDate });
+
+    for (const inv of driverInv) {
+      const carryWaste = carryOverWaste[inv.menu_item_id];
+      if (carryWaste) {
+        // Update driver inventory with carry over and waste info
+        const carryQty = carryWaste.carryOver || 0;
+        const wasteQty = carryWaste.markWaste || 0;
+
+        // Update the inventory record with carry over/waste breakdown
+        const updates = {
+          quantity_carryover: carryQty,
+          quantity_waste: wasteQty
+        };
+
+        await base44.entities.DriverInventory.update(inv.id, updates);
+      }
+    }
+
+    await load();
   };
 
   return (
@@ -322,10 +340,13 @@ export default function InventoryManagement() {
                     </div>
                     )}
 
-      {/* Save Button */}
+      {/* Save Buttons */}
       <div className="mt-8 flex gap-3">
         <Button className="gap-2 bg-foreground text-background hover:bg-foreground/90" onClick={handleSetMeals}>
           <CheckCircle className="w-4 h-4" /> Save Daily Inventory Levels
+        </Button>
+        <Button variant="outline" className="gap-2 border-foreground/20 text-foreground hover:bg-foreground/5" onClick={handleSaveCarryOverWaste}>
+          <CheckCircle className="w-4 h-4" /> Save Carry Over & Waste
         </Button>
       </div>
     </div>
