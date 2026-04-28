@@ -17,16 +17,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const createDriverIcon = (driverStatus, selected = false) => {
-  let bgColor = '#9ca3af'; // gray - unassigned
+const createDriverIcon = (driverStatus, hasAssigned, selected = false) => {
+  let bgColor = '#9ca3af'; // gray - no orders
   let shapeHtml = '<circle cx="50%" cy="50%" r="35%" fill="none" stroke="white" stroke-width="2"/>';
 
-  if (driverStatus === 'accepted') {
+  if (hasAssigned) {
+    bgColor = '#f59e0b'; // amber - waiting for driver acceptance
+    shapeHtml = '<circle cx="50%" cy="50%" r="40%" fill="white"/>';
+  } else if (driverStatus === 'accepted') {
     bgColor = '#22c55e'; // green - accepted/en route
     shapeHtml = '<polygon points="50%,20% 80%,70% 50%,60% 20%,70%" fill="white"/>';
-  } else if (driverStatus === 'assigned') {
-    bgColor = '#3b82f6'; // blue - assigned but not accepted
-    shapeHtml = '<rect x="30%" y="30%" width="40%" height="40%" fill="white"/>';
+  } else if (driverStatus === 'delivering') {
+    bgColor = '#3b82f6'; // blue - actively delivering
+    shapeHtml = '<polygon points="50%,20% 80%,70% 50%,60% 20%,70%" fill="white"/>';
   }
 
   return L.divIcon({
@@ -160,6 +163,10 @@ export default function DispatchScreen() {
     return 'assigned';
   };
 
+  const hasAssignedNotAccepted = (driver) => {
+    return orders.some(o => o.driver_id === driver.id && o.status === 'assigned');
+  };
+
   const InventoryBar = ({ driverId }) => {
     const inv = driverInventories[driverId] || [];
     if (inv.length === 0) return <p className="text-xs text-muted-foreground italic px-1">No inventory loaded</p>;
@@ -240,7 +247,7 @@ export default function DispatchScreen() {
                   <Marker
                     key={driver.id}
                     position={[driver.latitude, driver.longitude]}
-                    icon={createDriverIcon(getDriverStatus(driver), selectedDriver?.id === driver.id)}
+                    icon={createDriverIcon(getDriverStatus(driver), hasAssignedNotAccepted(driver), selectedDriver?.id === driver.id)}
                     eventHandlers={{ click: () => setSelectedDriver(driver) }}
                   >
                     <Popup>
@@ -365,7 +372,12 @@ export default function DispatchScreen() {
                 <div key={order.id} className="px-4 py-3 border-b border-border/50 bg-background hover:bg-background/80 transition-colors">
                   {/* Customer + total */}
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-sm font-semibold text-foreground">{order.customer_name || 'Customer'}</p>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-foreground">{order.customer_name || 'Customer'}</p>
+                      {order.status === 'assigned' && (
+                        <p className="text-xs text-amber-600 font-medium mt-0.5">⏳ Waiting for driver acceptance</p>
+                      )}
+                    </div>
                     <span className="font-bold text-sm text-foreground whitespace-nowrap">${order.total?.toFixed(2)}</span>
                   </div>
                   <p className="text-xs text-foreground/60 mb-2 line-clamp-1">{order.delivery_address}</p>
