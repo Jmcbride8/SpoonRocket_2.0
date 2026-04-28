@@ -37,18 +37,16 @@ export default function DeliveryOperations() {
 
   const load = async () => {
     setLoading(true);
-    const [d, m, spoil, sched, driverInv] = await Promise.all([
+    const [d, m, spoil, sched] = await Promise.all([
       base44.entities.Driver.list(),
       base44.entities.MenuItem.filter({ menu_date: today, is_active: true }),
       base44.entities.DriverInventory.filter({ spoilage_status: 'pending_review' }),
       base44.entities.DriverSchedule.filter({ shift_date: today }),
-      base44.entities.DriverInventory.filter({ shift_date: today }),
     ]);
     setDrivers(d);
     setMenuItems(m);
     setSpoilageRequests(spoil);
     setSchedules(sched);
-    setDriverInventory({ loaded: driverInv });
     setLoading(false);
   };
 
@@ -160,41 +158,8 @@ export default function DeliveryOperations() {
       </div>
 
       {tab === 'drivers' && (
-         <div className="space-y-6">
-           {/* Available Inventory Summary */}
-           {(() => {
-             const totalPrepared = menuItems.reduce((sum, m) => sum + (m.daily_inventory_level || 0), 0);
-             const totalAllocatedToDrivers = (driverInventory.loaded || []).reduce((sum, inv) => sum + inv.quantity_loaded, 0);
-             const availableInventory = totalPrepared - totalAllocatedToDrivers;
-             return (
-               <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-                 <p className="text-xs font-semibold text-foreground/60 uppercase mb-3">Available Inventory</p>
-                 <div className="grid grid-cols-3 gap-4">
-                   <div>
-                     <p className="text-lg font-bold text-foreground">{totalPrepared}</p>
-                     <p className="text-xs text-foreground/60">Total Prepared</p>
-                   </div>
-                   <div>
-                     <p className="text-lg font-bold text-foreground">{totalAllocatedToDrivers}</p>
-                     <p className="text-xs text-foreground/60">Allocated to Drivers</p>
-                   </div>
-                   <div>
-                     <p className="text-lg font-bold text-foreground">{Math.max(0, availableInventory)}</p>
-                     <p className="text-xs text-foreground/60">Remaining Available</p>
-                   </div>
-                 </div>
-               </div>
-             );
-           })()}
-
-           {/* Active Drivers */}
-           {(() => {
-             const activeDrivers = drivers.filter(d => ['on_shift', 'delivering'].includes(d.status));
-             return activeDrivers.length > 0 ? (
-               <div>
-                 <h3 className="text-sm font-semibold text-foreground mb-3">Active Drivers ({activeDrivers.length})</h3>
-                 <div className="space-y-3">
-                   {activeDrivers.map(driver => (
+        <div className="space-y-3">
+          {drivers.map(driver => (
             <div key={driver.id} className="bg-background border border-foreground/10 rounded-2xl overflow-hidden">
               <div className="flex items-center gap-4 p-4">
                 <div className="w-10 h-10 bg-foreground/10 rounded-full flex items-center justify-center">
@@ -239,74 +204,12 @@ export default function DeliveryOperations() {
                   )}
                 </div>
               )}
-                   </div>
-                 ))}
-               </div>
-              ) : null
-              })()}
+            </div>
+          ))}
+        </div>
+      )}
 
-              {/* Other Drivers */}
-                   {(() => {
-                   const otherDrivers = drivers.filter(d => !['on_shift', 'delivering'].includes(d.status));
-                   return otherDrivers.length > 0 ? (
-                   <div>
-                <h3 className="text-sm font-semibold text-foreground mb-3">Other Drivers ({otherDrivers.length})</h3>
-                <div className="space-y-3">
-                  {otherDrivers.map(driver => (
-                    <div key={driver.id} className="bg-background border border-foreground/10 rounded-2xl overflow-hidden">
-                      <div className="flex items-center gap-4 p-4">
-                        <div className="w-10 h-10 bg-foreground/10 rounded-full flex items-center justify-center">
-                          <Truck className="w-5 h-5 text-foreground" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-semibold text-foreground">{driver.full_name}</p>
-                          <p className="text-xs text-foreground/60">{driver.city} · {driver.vehicle_plate} · {driver.user_email}</p>
-                        </div>
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[driver.status]}`}>
-                          {driver.status?.replace('_', ' ')}
-                        </span>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openInventoryModal(driver)}>
-                            <Package className="w-3.5 h-3.5" /> Load
-                          </Button>
-                          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setShowScheduleModal(driver)}>
-                            <Calendar className="w-3.5 h-3.5" /> Schedule
-                          </Button>
-                          <button onClick={() => toggleDriverInventory(driver.id)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
-                            {expandedDriver === driver.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                          </button>
-                        </div>
-                      </div>
-
-                      {expandedDriver === driver.id && (
-                        <div className="border-t border-foreground/10 px-4 py-3 bg-foreground/3">
-                          <p className="text-xs font-semibold text-foreground/60 mb-2 uppercase tracking-wide">Today's Inventory</p>
-                          {(driverInventory[driver.id] || []).length === 0 ? (
-                            <p className="text-sm text-foreground/60">No inventory loaded today</p>
-                          ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                              {(driverInventory[driver.id] || []).map(inv => (
-                                <div key={inv.id} className="bg-background rounded-xl p-3 text-center border border-foreground/10">
-                                  <p className="text-xs font-medium text-foreground">{inv.menu_item_name}</p>
-                                  <p className="text-lg font-bold text-foreground mt-1">{inv.quantity_loaded - inv.quantity_sold - inv.quantity_spoiled}</p>
-                                  <p className="text-xs text-foreground/60">of {inv.quantity_loaded}</p>
-                                  <div className="text-xs mt-1 text-foreground">✓ {inv.quantity_sold} sold</div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                ) : null
-                })()}
-                </div>
-                </div>
-                )}
-
-                {tab === 'schedules' && (
+      {tab === 'schedules' && (
         <div className="space-y-3">
           {schedules.length === 0 ? (
             <div className="text-center py-12 border-2 border-dashed border-foreground/10 rounded-2xl">
