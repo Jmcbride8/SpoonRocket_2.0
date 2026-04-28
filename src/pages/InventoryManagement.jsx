@@ -158,43 +158,55 @@ export default function InventoryManagement() {
 
       {/* KPI Cards */}
       {!loading && (
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-background border border-foreground/10 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-foreground/60 uppercase">Sold</p>
-              <TrendingUp className="w-4 h-4 text-green-600" />
+        <>
+          <div className="grid md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-background border border-foreground/10 rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-foreground/60 uppercase">Sold</p>
+                <TrendingUp className="w-4 h-4 text-green-600" />
+              </div>
+              <p className="text-2xl font-bold text-foreground mb-1">${kpis.sold.toFixed(2)}</p>
+              <p className="text-xs text-foreground/60">{kpis.soldCount} items ({((kpis.soldCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.spoilageCount) || 0) * 100).toFixed(1)}%)</p>
             </div>
-            <p className="text-2xl font-bold text-foreground mb-1">${kpis.sold.toFixed(2)}</p>
-            <p className="text-xs text-foreground/60">{kpis.soldCount} items</p>
+
+            <div className="bg-background border border-foreground/10 rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-foreground/60 uppercase">Unsold</p>
+                <DollarSign className="w-4 h-4 text-yellow-600" />
+              </div>
+              <p className="text-2xl font-bold text-foreground mb-1">${kpis.unsold.toFixed(2)}</p>
+              <p className="text-xs text-foreground/60">{kpis.unsoldCount} items ({((kpis.unsoldCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.spoilageCount) || 0) * 100).toFixed(1)}%)</p>
+            </div>
+
+            <div className="bg-background border border-foreground/10 rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-foreground/60 uppercase">Waste</p>
+                <AlertTriangle className="w-4 h-4 text-orange-600" />
+              </div>
+              <p className="text-2xl font-bold text-foreground mb-1">${kpis.waste.toFixed(2)}</p>
+              <p className="text-xs text-foreground/60">{kpis.wasteCount} items ({((kpis.wasteCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.spoilageCount) || 0) * 100).toFixed(1)}%)</p>
+            </div>
+
+            <div className="bg-background border border-foreground/10 rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-foreground/60 uppercase">Spoilage</p>
+                <AlertTriangle className="w-4 h-4 text-red-600" />
+              </div>
+              <p className="text-2xl font-bold text-foreground mb-1">${kpis.spoilage.toFixed(2)}</p>
+              <p className="text-xs text-foreground/60">{kpis.spoilageCount} items ({((kpis.spoilageCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.spoilageCount) || 0) * 100).toFixed(1)}%)</p>
+            </div>
           </div>
 
-          <div className="bg-background border border-foreground/10 rounded-2xl p-5">
+          {/* GM% Card */}
+          <div className="mb-8 bg-background border border-foreground/10 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-foreground/60 uppercase">Unsold</p>
-              <DollarSign className="w-4 h-4 text-yellow-600" />
+              <p className="text-xs font-semibold text-foreground/60 uppercase">Gross Margin %</p>
+              <TrendingUp className="w-4 h-4 text-blue-600" />
             </div>
-            <p className="text-2xl font-bold text-foreground mb-1">${kpis.unsold.toFixed(2)}</p>
-            <p className="text-xs text-foreground/60">{kpis.unsoldCount} items</p>
+            <p className="text-3xl font-bold text-foreground">{((kpis.sold / (kpis.waste + kpis.spoilage) || 0) * 100).toFixed(1)}%</p>
+            <p className="text-xs text-foreground/60 mt-2">Sold vs Waste + Spoilage</p>
           </div>
-
-          <div className="bg-background border border-foreground/10 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-foreground/60 uppercase">Waste</p>
-              <AlertTriangle className="w-4 h-4 text-orange-600" />
-            </div>
-            <p className="text-2xl font-bold text-foreground mb-1">${kpis.waste.toFixed(2)}</p>
-            <p className="text-xs text-foreground/60">{kpis.wasteCount} items</p>
-          </div>
-
-          <div className="bg-background border border-foreground/10 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-foreground/60 uppercase">Spoilage</p>
-              <AlertTriangle className="w-4 h-4 text-red-600" />
-            </div>
-            <p className="text-2xl font-bold text-foreground mb-1">${kpis.spoilage.toFixed(2)}</p>
-            <p className="text-xs text-foreground/60">{kpis.spoilageCount} items</p>
-          </div>
-        </div>
+        </>
       )}
 
       {/* Inventory Grid */}
