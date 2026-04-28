@@ -21,6 +21,7 @@ const emptyForm = {
   description: '',
   category: 'meat',
   price: '',
+  cogs: '',
   calories: '',
   allergens: '',
   image_url: '',
@@ -56,6 +57,7 @@ export default function MenuItemLibrary() {
       description: item.description,
       category: item.category,
       price: String(item.price),
+      cogs: String(item.cogs || ''),
       calories: String(item.calories || ''),
       allergens: item.allergens,
       image_url: item.image_url,
@@ -69,6 +71,7 @@ export default function MenuItemLibrary() {
     const data = {
       ...form,
       price: parseFloat(form.price),
+      cogs: form.cogs ? parseFloat(form.cogs) : null,
       calories: form.calories ? parseInt(form.calories) : null,
       is_active: true,
       menu_date: new Date().toISOString().split('T')[0],
@@ -148,7 +151,12 @@ export default function MenuItemLibrary() {
               <div className="p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <h3 className="font-semibold text-foreground text-sm line-clamp-2">{item.name}</h3>
-                  <span className="font-bold text-primary whitespace-nowrap">${item.price?.toFixed(2)}</span>
+                  <div className="text-right">
+                    <p className="font-bold text-primary whitespace-nowrap">${item.price?.toFixed(2)}</p>
+                    {item.cogs && (
+                      <p className="text-xs text-foreground/60">COGS: ${item.cogs?.toFixed(2)}</p>
+                    )}
+                  </div>
                 </div>
 
                 <Badge className={`text-xs ${CATEGORY_COLORS[item.category]} border-0 mb-2`}>
@@ -261,13 +269,23 @@ export default function MenuItemLibrary() {
                   className="bg-foreground/3 border-foreground/10 text-foreground placeholder-foreground/40"
                 />
                 <Input
-                  placeholder="Calories"
+                  placeholder="COGS ($)"
                   type="number"
-                  value={form.calories}
-                  onChange={e => setForm(p => ({...p, calories: e.target.value}))}
+                  min="0"
+                  step="0.01"
+                  value={form.cogs}
+                  onChange={e => setForm(p => ({...p, cogs: e.target.value}))}
                   className="bg-foreground/3 border-foreground/10 text-foreground placeholder-foreground/40"
                 />
               </div>
+
+              <Input
+                placeholder="Calories"
+                type="number"
+                value={form.calories}
+                onChange={e => setForm(p => ({...p, calories: e.target.value}))}
+                className="bg-foreground/3 border-foreground/10 text-foreground placeholder-foreground/40"
+              />
 
               <Input
                 placeholder="Allergens (e.g., nuts, dairy)"

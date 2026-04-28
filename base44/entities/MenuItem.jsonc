@@ -20,6 +20,10 @@
     "price": {
       "type": "number"
     },
+    "cogs": {
+      "type": "number",
+      "description": "Cost of goods sold (not visible to customers)"
+    },
     "image_url": {
       "type": "string"
     },
