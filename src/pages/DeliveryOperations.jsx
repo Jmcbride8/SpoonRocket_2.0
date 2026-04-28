@@ -378,7 +378,6 @@ export default function DeliveryOperations() {
                     <div key={item.id} className="flex items-center justify-between gap-3 p-3 bg-foreground/3 rounded-lg border border-foreground/10">
                       <div>
                         <p className="text-sm font-medium text-foreground">{item.name}</p>
-                        <p className="text-xs text-foreground/60 capitalize">{item.category} · ${item.price}</p>
                         <p className="text-xs text-foreground/50 mt-1">Available: <span className="font-semibold text-foreground">{available}</span> of {item.daily_inventory_level}</p>
                       </div>
                       <div className="flex items-center gap-2">
