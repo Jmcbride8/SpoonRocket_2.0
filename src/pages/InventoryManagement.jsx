@@ -41,25 +41,38 @@ export default function InventoryManagement() {
       ]);
 
       let soldAmount = 0, soldCount = 0, unsoldAmount = 0, unsoldCount = 0, wasteAmount = 0, wasteCount = 0, spoilageAmount = 0, spoilageCount = 0;
+      const itemMetrics = {};
 
       // Orders - sold items
       orders.forEach(order => {
         (order.items || []).forEach(item => {
           soldAmount += item.price * item.quantity;
           soldCount += item.quantity;
+          if (!itemMetrics[item.menu_item_id]) {
+            itemMetrics[item.menu_item_id] = { sold: 0, soldCount: 0, unsold: 0, unsoldCount: 0, waste: 0, wasteCount: 0, spoilage: 0, spoilageCount: 0 };
+          }
+          itemMetrics[item.menu_item_id].sold += item.price * item.quantity;
+          itemMetrics[item.menu_item_id].soldCount += item.quantity;
         });
       });
 
       // Driver inventory - unsold, waste, spoilage
       driverInv.forEach(inv => {
         const unsoldQty = (inv.quantity_loaded || 0) - (inv.quantity_sold || 0) - (inv.quantity_spoiled || 0);
+        if (!itemMetrics[inv.menu_item_id]) {
+          itemMetrics[inv.menu_item_id] = { sold: 0, soldCount: 0, unsold: 0, unsoldCount: 0, waste: 0, wasteCount: 0, spoilage: 0, spoilageCount: 0 };
+        }
         if (unsoldQty > 0) {
           unsoldAmount += inv.price * unsoldQty;
           unsoldCount += unsoldQty;
+          itemMetrics[inv.menu_item_id].unsold += inv.price * unsoldQty;
+          itemMetrics[inv.menu_item_id].unsoldCount += unsoldQty;
         }
         if (inv.quantity_spoiled > 0) {
           spoilageAmount += inv.price * inv.quantity_spoiled;
           spoilageCount += inv.quantity_spoiled;
+          itemMetrics[inv.menu_item_id].spoilage += inv.price * inv.quantity_spoiled;
+          itemMetrics[inv.menu_item_id].spoilageCount += inv.quantity_spoiled;
         }
       });
 
@@ -74,17 +87,25 @@ export default function InventoryManagement() {
           if (waste > 0) {
             wasteAmount += item.price * waste;
             wasteCount += waste;
+            if (!itemMetrics[item.id]) {
+              itemMetrics[item.id] = { sold: 0, soldCount: 0, unsold: 0, unsoldCount: 0, waste: 0, wasteCount: 0, spoilage: 0, spoilageCount: 0 };
+            }
+            itemMetrics[item.id].waste += item.price * waste;
+            itemMetrics[item.id].wasteCount += waste;
           }
         });
       });
 
       setKpis({ sold: soldAmount, unsold: unsoldAmount, waste: wasteAmount, spoilage: spoilageAmount, soldCount, unsoldCount, wasteCount, spoilageCount });
+      // Store itemMetrics in state to use in rendering
+      window.__itemMetrics = itemMetrics;
     } catch (error) {
       console.error('Failed to load inventory:', error);
       const grouped = {};
       CATEGORIES.forEach(cat => { grouped[cat] = []; });
       setInventory(grouped);
       setKpis({ sold: 0, unsold: 0, waste: 0, spoilage: 0, soldCount: 0, unsoldCount: 0, wasteCount: 0, spoilageCount: 0 });
+      window.__itemMetrics = {};
     }
     setLoading(false);
   };
@@ -197,22 +218,45 @@ export default function InventoryManagement() {
                    <p className="text-foreground/60 text-sm italic">No items configured</p>
                  ) : (
                    <div className="space-y-3 mb-4">
-                     {items.map(item => (
-                       <div key={item.id} className="flex items-center justify-between p-3 bg-foreground/3 rounded-lg border border-foreground/10">
-                         <div>
-                           <p className="text-sm font-medium text-foreground">{item.name}</p>
-                           <p className="text-xs text-foreground/60">${item.price}</p>
+                     {items.map(item => {
+                       const metrics = window.__itemMetrics?.[item.id] || { sold: 0, soldCount: 0, unsold: 0, unsoldCount: 0, waste: 0, wasteCount: 0, spoilage: 0, spoilageCount: 0 };
+                       return (
+                       <div key={item.id} className="p-3 bg-foreground/3 rounded-lg border border-foreground/10">
+                         <div className="flex items-center justify-between mb-2">
+                           <div>
+                             <p className="text-sm font-medium text-foreground">{item.name}</p>
+                             <p className="text-xs text-foreground/60">${item.price}</p>
+                           </div>
+                           <Input
+                             type="number"
+                             min="0"
+                             value={dailyLevels[item.id] || ''}
+                             onChange={e => setDailyLevels({ ...dailyLevels, [item.id]: e.target.value })}
+                             placeholder="0"
+                             className="w-16 h-8 bg-background border-foreground/20 text-foreground text-sm text-right"
+                           />
                          </div>
-                         <Input
-                           type="number"
-                           min="0"
-                           value={dailyLevels[item.id] || ''}
-                           onChange={e => setDailyLevels({ ...dailyLevels, [item.id]: e.target.value })}
-                           placeholder="0"
-                           className="w-16 h-8 bg-background border-foreground/20 text-foreground text-sm text-right"
-                         />
+                         <div className="grid grid-cols-4 gap-2 text-xs">
+                           <div className="bg-green-100 text-green-700 p-2 rounded">
+                             <p className="font-semibold">${metrics.sold.toFixed(0)}</p>
+                             <p className="text-xs">Sold</p>
+                           </div>
+                           <div className="bg-yellow-100 text-yellow-700 p-2 rounded">
+                             <p className="font-semibold">${metrics.unsold.toFixed(0)}</p>
+                             <p className="text-xs">Unsold</p>
+                           </div>
+                           <div className="bg-orange-100 text-orange-700 p-2 rounded">
+                             <p className="font-semibold">${metrics.waste.toFixed(0)}</p>
+                             <p className="text-xs">Waste</p>
+                           </div>
+                           <div className="bg-red-100 text-red-700 p-2 rounded">
+                             <p className="font-semibold">${metrics.spoilage.toFixed(0)}</p>
+                             <p className="text-xs">Spoilage</p>
+                           </div>
+                         </div>
                        </div>
-                     ))}
+                       );
+                     })}
                      </div>
                      )}
 
