@@ -27,6 +27,7 @@ export default function DeliveryOperations() {
   const [showScheduleModal, setShowScheduleModal] = useState(null);
   const [expandedDriver, setExpandedDriver] = useState(null);
   const [driverInventory, setDriverInventory] = useState({});
+  const [assignedQuantities, setAssignedQuantities] = useState({});
 
   const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -37,16 +38,24 @@ export default function DeliveryOperations() {
 
   const load = async () => {
     setLoading(true);
-    const [d, m, spoil, sched] = await Promise.all([
+    const [d, m, spoil, sched, allAssigned] = await Promise.all([
       base44.entities.Driver.list(),
       base44.entities.MenuItem.filter({ menu_date: today, is_active: true }),
       base44.entities.DriverInventory.filter({ spoilage_status: 'pending_review' }),
       base44.entities.DriverSchedule.filter({ shift_date: today }),
+      base44.entities.DriverInventory.filter({ shift_date: today }),
     ]);
     setDrivers(d);
     setMenuItems(m);
     setSpoilageRequests(spoil);
     setSchedules(sched);
+
+    // Calculate assigned quantities by menu item
+    const assigned = {};
+    allAssigned.forEach(inv => {
+      assigned[inv.menu_item_id] = (assigned[inv.menu_item_id] || 0) + (inv.quantity_loaded || 0);
+    });
+    setAssignedQuantities(assigned);
     setLoading(false);
   };
 
@@ -363,19 +372,23 @@ export default function DeliveryOperations() {
               <p className="text-sm text-foreground/60 text-center py-4">No menu items for today</p>
             ) : (
               <div className="space-y-3 mb-5">
-                {inventoryForm.map((item, idx) => (
-                  <div key={item.id} className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{item.name}</p>
-                      <p className="text-xs text-foreground/60 capitalize">{item.category} · ${item.price}</p>
+                {inventoryForm.map((item, idx) => {
+                  const available = (item.daily_inventory_level || 0) - (assignedQuantities[item.id] || 0);
+                  return (
+                    <div key={item.id} className="flex items-center justify-between gap-3 p-3 bg-foreground/3 rounded-lg border border-foreground/10">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{item.name}</p>
+                        <p className="text-xs text-foreground/60 capitalize">{item.category} · ${item.price}</p>
+                        <p className="text-xs text-foreground/50 mt-1">Available: <span className="font-semibold text-foreground">{available}</span> of {item.daily_inventory_level}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => setInventoryForm(p => p.map((x, i) => i === idx ? {...x, quantity: Math.max(0, x.quantity - 1)} : x))} className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center">-</button>
+                        <span className="w-6 text-center font-bold text-sm text-foreground">{item.quantity}</span>
+                        <button onClick={() => setInventoryForm(p => p.map((x, i) => i === idx ? {...x, quantity: Math.min(available, x.quantity + 1)} : x))} className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center">+</button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => setInventoryForm(p => p.map((x, i) => i === idx ? {...x, quantity: Math.max(0, x.quantity - 1)} : x))} className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center">-</button>
-                      <span className="w-6 text-center font-bold text-sm text-foreground">{item.quantity}</span>
-                      <button onClick={() => setInventoryForm(p => p.map((x, i) => i === idx ? {...x, quantity: x.quantity + 1} : x))} className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center">+</button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
             <div className="flex gap-3">
