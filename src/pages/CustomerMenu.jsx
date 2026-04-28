@@ -100,20 +100,20 @@ export default function CustomerMenu() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
-      <div className="relative bg-primary overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+      <div className="relative bg-foreground overflow-hidden">
+        <div className="absolute inset-0 opacity-5">
           <div className="absolute top-4 right-8 text-8xl">🍽️</div>
           <div className="absolute bottom-2 left-12 text-6xl">✨</div>
         </div>
         <div className="relative max-w-2xl mx-auto px-6 py-10 text-center">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <ChefHat className="w-6 h-6 text-primary-foreground/80" />
-            <span className="text-primary-foreground/80 text-sm font-medium tracking-widest uppercase">SpoonDash</span>
+            <ChefHat className="w-6 h-6 text-background/80" />
+            <span className="text-background/80 text-sm font-medium tracking-widest uppercase">SpoonDash</span>
           </div>
-          <h1 className="font-playfair text-3xl md:text-4xl font-bold text-primary-foreground mb-2">
+          <h1 className="font-sans text-3xl md:text-4xl font-bold text-background mb-2">
             Today's Menu
           </h1>
-          <p className="text-primary-foreground/70 text-sm">
+          <p className="text-background/70 text-sm">
             {format(new Date(), 'EEEE, MMMM d')} · Fresh & delivered to your door
           </p>
         </div>
@@ -123,14 +123,14 @@ export default function CustomerMenu() {
         {loading ? (
           <div className="grid gap-4">
             {[1,2,3,4].map(i => (
-              <div key={i} className="h-32 bg-muted rounded-2xl animate-pulse" />
+              <div key={i} className="h-32 bg-foreground/5 rounded-2xl animate-pulse" />
             ))}
           </div>
         ) : menuItems.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-5xl mb-4">🍽️</div>
-            <h2 className="font-playfair text-2xl font-semibold text-foreground mb-2">No menu today</h2>
-            <p className="text-muted-foreground">Check back soon — we update daily!</p>
+            <h2 className="font-sans text-2xl font-semibold text-foreground mb-2">No menu today</h2>
+            <p className="text-foreground/60">Check back soon — we update daily!</p>
           </div>
         ) : (
           <div className="space-y-8">
@@ -140,31 +140,31 @@ export default function CustomerMenu() {
               return (
                 <div key={cat}>
                   <div className="flex items-center gap-2 mb-3">
-                    {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-4 h-4 text-primary" />; })()}
+                    {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-4 h-4 text-foreground" />; })()}
                     <h2 className="font-semibold text-foreground">{CATEGORY_LABELS[cat]}</h2>
                   </div>
                   <div className="space-y-3">
                     {items.map(item => (
-                      <div key={item.id} className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                      <div key={item.id} className="bg-background border border-foreground/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex gap-4 p-4">
                           {item.image_url ? (
                             <img src={item.image_url} alt={item.name} className="w-24 h-24 object-cover rounded-xl flex-shrink-0" />
                           ) : (
-                            <div className="w-24 h-24 bg-secondary rounded-xl flex items-center justify-center flex-shrink-0">
-                              {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-9 h-9 text-muted-foreground" />; })()}
+                            <div className="w-24 h-24 bg-foreground/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-foreground/10">
+                              {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-9 h-9 text-foreground/60" />; })()}
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
-                              <h3 className="font-semibold text-foreground text-base leading-tight">{item.name}</h3>
-                              <span className="font-bold text-primary text-lg whitespace-nowrap">${item.price.toFixed(2)}</span>
-                            </div>
-                            {item.description && (
-                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
-                            )}
-                            {item.calories && (
-                              <p className="text-xs text-muted-foreground mt-1">{item.calories} cal</p>
-                            )}
+                               <h3 className="font-semibold text-foreground text-base leading-tight">{item.name}</h3>
+                               <span className="font-bold text-foreground text-lg whitespace-nowrap">${item.price.toFixed(2)}</span>
+                             </div>
+                             {item.description && (
+                               <p className="text-sm text-foreground/60 mt-1 line-clamp-2">{item.description}</p>
+                             )}
+                             {item.calories && (
+                               <p className="text-xs text-foreground/60 mt-1">{item.calories} cal</p>
+                             )}
                             <div className="flex items-center gap-2 mt-3">
                               {cart[item.id] ? (
                                 <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ export default function CustomerMenu() {
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
           <button
             onClick={() => setShowCart(true)}
-            className="flex items-center gap-3 bg-primary text-primary-foreground px-6 py-3.5 rounded-full shadow-xl font-medium text-sm hover:bg-primary/90 transition-all hover:scale-105"
+            className="flex items-center gap-3 bg-foreground text-background px-6 py-3.5 rounded-full shadow-xl font-medium text-sm hover:bg-foreground/90 transition-all hover:scale-105"
           >
             <ShoppingCart className="w-4 h-4" />
             <span>View order · {cartCount} item{cartCount !== 1 ? 's' : ''}</span>
@@ -210,34 +210,34 @@ export default function CustomerMenu() {
       )}
 
       {/* Cart Drawer */}
-      {showCart && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-end md:items-center justify-center" onClick={() => setShowCart(false)}>
-          <div className="bg-card w-full max-w-md rounded-t-3xl md:rounded-3xl shadow-2xl p-6 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-playfair text-xl font-bold">Your Order</h2>
-              <button onClick={() => setShowCart(false)} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+       {showCart && (
+         <div className="fixed inset-0 z-50 bg-black/40 flex items-end md:items-center justify-center" onClick={() => setShowCart(false)}>
+           <div className="bg-background w-full max-w-md rounded-t-3xl md:rounded-3xl shadow-2xl p-6 max-h-[85vh] overflow-y-auto border border-foreground/10" onClick={e => e.stopPropagation()}>
+             <div className="flex items-center justify-between mb-5">
+               <h2 className="font-sans text-xl font-bold text-foreground">Your Order</h2>
+               <button onClick={() => setShowCart(false)} className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center">
+                 <X className="w-4 h-4" />
+               </button>
+             </div>
 
             <div className="space-y-3 mb-5">
               {cartItems.map(item => (
                 <div key={item.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 bg-secondary rounded-lg flex items-center justify-center">
-                      {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[item.category]; return <CatIcon className="w-3.5 h-3.5 text-primary" />; })()}
+                    <div className="w-7 h-7 bg-foreground/10 rounded-lg flex items-center justify-center">
+                      {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[item.category]; return <CatIcon className="w-3.5 h-3.5 text-foreground" />; })()}
                     </div>
                     <div>
-                      <p className="text-sm font-medium">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">${item.price.toFixed(2)} each</p>
+                      <p className="text-sm font-medium text-foreground">{item.name}</p>
+                      <p className="text-xs text-foreground/60">${item.price.toFixed(2)} each</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => removeFromCart(item)} className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center">
+                    <button onClick={() => removeFromCart(item)} className="w-6 h-6 rounded-full bg-foreground/10 flex items-center justify-center">
                       <Minus className="w-3 h-3" />
                     </button>
                     <span className="text-sm font-semibold w-4 text-center">{cart[item.id]}</span>
-                    <button onClick={() => addToCart(item)} className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+                    <button onClick={() => addToCart(item)} className="w-6 h-6 rounded-full bg-foreground text-background flex items-center justify-center">
                       <Plus className="w-3 h-3" />
                     </button>
                   </div>
@@ -245,14 +245,14 @@ export default function CustomerMenu() {
               ))}
             </div>
 
-            <div className="border-t border-border pt-4 mb-4">
-              <div className="flex justify-between text-sm text-muted-foreground mb-1">
+            <div className="border-t border-foreground/10 pt-4 mb-4">
+              <div className="flex justify-between text-sm text-foreground/60 mb-1">
                 <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-sm text-muted-foreground mb-3">
+              <div className="flex justify-between text-sm text-foreground/60 mb-3">
                 <span>Delivery fee</span><span>${deliveryFee.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between font-bold text-base">
+              <div className="flex justify-between font-bold text-base text-foreground">
                 <span>Total</span><span>${total.toFixed(2)}</span>
               </div>
             </div>
@@ -263,13 +263,13 @@ export default function CustomerMenu() {
                 placeholder="Delivery address *"
                 value={address}
                 onChange={e => setAddress(e.target.value)}
-                className="w-full px-4 py-3 border border-input rounded-xl text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full px-4 py-3 border border-foreground/10 rounded-xl text-sm bg-foreground/3 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-foreground/20"
               />
               <Textarea
                 placeholder="Special instructions (optional)"
                 value={instructions}
                 onChange={e => setInstructions(e.target.value)}
-                className="resize-none text-sm"
+                className="resize-none text-sm bg-foreground/3 border-foreground/10 text-foreground placeholder-foreground/40"
                 rows={2}
               />
             </div>
@@ -277,11 +277,11 @@ export default function CustomerMenu() {
             <Button
               onClick={handleCheckout}
               disabled={checkingOut || !address.trim()}
-              className="w-full rounded-xl py-3 text-base font-semibold"
+              className="w-full rounded-xl py-3 text-base font-semibold bg-foreground text-background hover:bg-foreground/90"
             >
               {checkingOut ? 'Placing order...' : `Place Order · $${total.toFixed(2)}`}
             </Button>
-            <p className="text-center text-xs text-muted-foreground mt-2">Stripe payment coming soon · Demo mode</p>
+            <p className="text-center text-xs text-foreground/60 mt-2">Stripe payment coming soon · Demo mode</p>
           </div>
         </div>
       )}

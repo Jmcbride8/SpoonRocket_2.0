@@ -41,13 +41,13 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar Desktop */}
-      <aside className="hidden md:flex flex-col w-60 bg-card border-r border-border shrink-0">
-        <div className="px-6 py-5 border-b border-border">
+      <aside className="hidden md:flex flex-col w-60 bg-foreground border-r border-foreground/10 shrink-0">
+        <div className="px-6 py-5 border-b border-foreground/10">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <ChefHat className="w-4 h-4 text-primary-foreground" />
+            <div className="w-8 h-8 bg-background rounded-lg flex items-center justify-center">
+              <ChefHat className="w-4 h-4 text-foreground" />
             </div>
-            <span className="font-playfair font-bold text-lg text-foreground">SpoonDash</span>
+            <span className="font-sans font-bold text-lg text-background">SpoonDash</span>
           </div>
         </div>
 
@@ -59,8 +59,8 @@ export default function Layout() {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                 location.pathname === to || location.pathname.startsWith(to + '/')
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  ? "bg-background text-foreground"
+                  : "text-background/60 hover:text-background hover:bg-foreground/10"
               )}
             >
               <Icon className="w-4 h-4" />
@@ -69,20 +69,20 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-foreground/10">
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="w-7 h-7 bg-accent rounded-full flex items-center justify-center">
-              <User className="w-4 h-4 text-accent-foreground" />
+            <div className="w-7 h-7 bg-background rounded-full flex items-center justify-center">
+              <User className="w-4 h-4 text-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-foreground truncate">{user?.full_name || user?.email}</p>
-              <p className="text-xs text-muted-foreground capitalize">{user?.role || 'customer'}</p>
+              <p className="text-xs font-medium text-background truncate">{user?.full_name || user?.email}</p>
+              <p className="text-xs text-background/60 capitalize">{user?.role || 'customer'}</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            className="w-full justify-start gap-2 text-background/60 hover:text-background"
             onClick={handleLogout}
           >
             <LogOut className="w-4 h-4" />
@@ -92,22 +92,22 @@ export default function Layout() {
       </aside>
 
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-foreground border-b border-foreground/10 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
-            <ChefHat className="w-3.5 h-3.5 text-primary-foreground" />
+          <div className="w-7 h-7 bg-background rounded-lg flex items-center justify-center">
+            <ChefHat className="w-3.5 h-3.5 text-foreground" />
           </div>
-          <span className="font-playfair font-bold text-base">SpoonDash</span>
+          <span className="font-sans font-bold text-base text-background">SpoonDash</span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          {mobileOpen ? <X className="w-5 h-5 text-background" /> : <Menu className="w-5 h-5 text-background" />}
         </Button>
       </div>
 
       {/* Mobile Drawer */}
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-background/80 backdrop-blur-sm" onClick={() => setMobileOpen(false)}>
-          <div className="absolute left-0 top-0 bottom-0 w-64 bg-card border-r border-border p-4 pt-16" onClick={e => e.stopPropagation()}>
+          <div className="absolute left-0 top-0 bottom-0 w-64 bg-foreground border-r border-foreground/10 p-4 pt-16" onClick={e => e.stopPropagation()}>
             <nav className="space-y-1">
               {links.map(({ to, label, icon: Icon }) => (
                 <Link
@@ -117,8 +117,8 @@ export default function Layout() {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                     location.pathname === to
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                      ? "bg-background text-foreground"
+                      : "text-background/60 hover:text-background hover:bg-foreground/10"
                   )}
                 >
                   <Icon className="w-4 h-4" />
@@ -126,8 +126,8 @@ export default function Layout() {
                 </Link>
               ))}
             </nav>
-            <div className="mt-4 pt-4 border-t border-border">
-              <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={handleLogout}>
+            <div className="mt-4 pt-4 border-t border-foreground/10">
+              <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-background/60 hover:text-background" onClick={handleLogout}>
                 <LogOut className="w-4 h-4" />
                 Sign out
               </Button>
