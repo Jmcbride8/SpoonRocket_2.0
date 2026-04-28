@@ -178,18 +178,18 @@ export default function DispatchScreen() {
   return (
     <div className="flex flex-col h-screen bg-foreground">
       {/* Top bar */}
-      <div className="px-6 py-4 border-b border-border bg-primary flex items-center justify-between shrink-0">
+      <div className="px-6 py-4 border-b border-foreground/10 bg-white flex items-center justify-between shrink-0">
         <div>
-          <h1 className="font-sans text-xl font-bold text-primary-foreground">Dispatch</h1>
-          <p className="text-xs text-primary-foreground/70">{drivers.length} active · {allActiveOrders.length} pending</p>
+          <h1 className="font-sans text-xl font-bold text-foreground">Dispatch</h1>
+          <p className="text-xs text-foreground/60">{drivers.length} active · {allActiveOrders.length} pending</p>
         </div>
         <div className="flex items-center gap-3">
-           <div className="flex items-center gap-2 bg-primary-foreground/20 border border-primary-foreground/30 rounded-lg px-2 py-1">
-             <Filter className="w-3.5 h-3.5 text-primary-foreground/70" />
+           <div className="flex items-center gap-2 bg-foreground/5 border border-foreground/10 rounded-lg px-2 py-1">
+             <Filter className="w-3.5 h-3.5 text-foreground/60" />
              <select
                value={ageFilter}
                onChange={e => setAgeFilter(e.target.value)}
-               className="bg-transparent text-xs font-medium text-primary-foreground outline-none"
+               className="bg-transparent text-xs font-medium text-foreground outline-none"
              >
                <option value="all">All Orders</option>
                <option value="fresh">Fresh (&lt;10m)</option>
@@ -199,13 +199,13 @@ export default function DispatchScreen() {
              </select>
            </div>
            {selectedDriver && (
-             <div className="flex items-center gap-2 bg-primary-foreground/20 border border-primary-foreground/30 px-3 py-1.5 rounded-lg">
-               <div className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
-               <span className="text-sm font-medium text-primary-foreground">{selectedDriver.full_name}</span>
-               <button onClick={() => setSelectedDriver(null)} className="text-primary-foreground hover:opacity-70 ml-1 text-lg leading-none">&times;</button>
+             <div className="flex items-center gap-2 bg-foreground/5 border border-foreground/10 px-3 py-1.5 rounded-lg">
+               <div className="w-2 h-2 rounded-full bg-foreground/40 animate-pulse" />
+               <span className="text-sm font-medium text-foreground">{selectedDriver.full_name}</span>
+               <button onClick={() => setSelectedDriver(null)} className="text-foreground/60 hover:text-foreground ml-1 text-lg leading-none">&times;</button>
              </div>
            )}
-           <Button className="bg-primary-foreground text-primary hover:bg-primary-foreground/90" size="sm" onClick={load}>Refresh</Button>
+           <Button className="bg-foreground text-background hover:bg-foreground/90" size="sm" onClick={load}>Refresh</Button>
         </div>
       </div>
 

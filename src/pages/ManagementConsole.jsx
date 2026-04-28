@@ -106,7 +106,32 @@ export default function ManagementConsole() {
     setUpdatingComplaint(null);
   };
 
-  const tabs = ['overview', 'orders', 'complaints'];
+  // Customer analytics
+  const uniqueCustomers = [...new Set(orders.map(o => o.customer_email))].length;
+  const customerOrders = orders.reduce((acc, o) => {
+    if (!acc[o.customer_email]) {
+      acc[o.customer_email] = {
+        email: o.customer_email,
+        name: o.customer_name,
+        orders: 0,
+        totalSpent: 0,
+        lastOrder: o.order_date,
+        avgRating: [],
+      };
+    }
+    acc[o.customer_email].orders += 1;
+    acc[o.customer_email].totalSpent += o.total || 0;
+    acc[o.customer_email].lastOrder = new Date(o.order_date) > new Date(acc[o.customer_email].lastOrder) ? o.order_date : acc[o.customer_email].lastOrder;
+    if (o.customer_rating) acc[o.customer_email].avgRating.push(o.customer_rating);
+    return acc;
+  }, {});
+
+  const customerList = Object.values(customerOrders).sort((a, b) => new Date(b.lastOrder) - new Date(a.lastOrder));
+  const totalLTV = customerList.reduce((s, c) => s + c.totalSpent, 0);
+  const avgLTV = uniqueCustomers > 0 ? totalLTV / uniqueCustomers : 0;
+  const repeatCustomers = customerList.filter(c => c.orders > 1).length;
+
+  const tabs = ['overview', 'orders', 'customers', 'complaints'];
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto bg-background">
@@ -241,6 +266,81 @@ export default function ManagementConsole() {
                     <Bar dataKey="count" radius={[4,4,0,0]} fill="currentColor" />
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'customers' && (
+            <>
+              {/* Customer KPI Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <StatCard
+                  icon={ShoppingBag}
+                  label="Total Customers"
+                  value={uniqueCustomers}
+                  sub={`${repeatCustomers} returning`}
+                  color="bg-blue-100 text-blue-700"
+                />
+                <StatCard
+                  icon={DollarSign}
+                  label="Total LTV"
+                  value={`$${totalLTV.toFixed(0)}`}
+                  sub={`${orders.length} orders`}
+                  color="bg-green-100 text-green-700"
+                />
+                <StatCard
+                  icon={TrendingUp}
+                  label="Avg LTV"
+                  value={`$${avgLTV.toFixed(2)}`}
+                  sub={`${uniqueCustomers > 0 ? (totalLTV / orders.length).toFixed(2) : '0'} avg order`}
+                  color="bg-purple-100 text-purple-700"
+                />
+                <StatCard
+                  icon={Star}
+                  label="Repeat Rate"
+                  value={`${uniqueCustomers > 0 ? ((repeatCustomers / uniqueCustomers) * 100).toFixed(0) : '0'}%`}
+                  sub={`${repeatCustomers} customers`}
+                  color="bg-yellow-100 text-yellow-700"
+                />
+              </div>
+
+              {/* Customer Table */}
+              <div className="bg-background border border-foreground/10 rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-foreground/10 bg-foreground/3">
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-foreground/60 uppercase tracking-wide">Customer</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-foreground/60 uppercase tracking-wide">Orders</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-foreground/60 uppercase tracking-wide">Lifetime Value</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-foreground/60 uppercase tracking-wide">Avg Order</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-foreground/60 uppercase tracking-wide">Last Ordered</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-foreground/60 uppercase tracking-wide">Avg Rating</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {customerList.map(cust => (
+                        <tr key={cust.email} className="border-b border-foreground/10 hover:bg-foreground/3 transition-colors">
+                          <td className="px-4 py-3">
+                            <p className="font-medium text-foreground">{cust.name || cust.email}</p>
+                            <p className="text-xs text-foreground/60">{cust.email}</p>
+                          </td>
+                          <td className="px-4 py-3 text-foreground font-medium">{cust.orders}</td>
+                          <td className="px-4 py-3 text-foreground font-semibold">${cust.totalSpent.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-foreground/60">${(cust.totalSpent / cust.orders).toFixed(2)}</td>
+                          <td className="px-4 py-3 text-foreground/60">{cust.lastOrder}</td>
+                          <td className="px-4 py-3">
+                            {cust.avgRating.length > 0 ? (
+                              <span className="flex items-center gap-1 text-yellow-600">
+                                ⭐ {(cust.avgRating.reduce((a, b) => a + b, 0) / cust.avgRating.length).toFixed(1)}
+                              </span>
+                            ) : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </>
           )}
