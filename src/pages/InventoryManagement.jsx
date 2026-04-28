@@ -41,39 +41,51 @@ export default function InventoryManagement() {
         base44.entities.DriverInventory.filter({ shift_date: selectedDate }),
       ]);
 
-      let soldAmount = 0, soldCount = 0, unsoldAmount = 0, unsoldCount = 0, wasteAmount = 0, wasteCount = 0, spoilageAmount = 0, spoilageCount = 0;
+      let soldAmount = 0, soldCogs = 0, soldCount = 0, unsoldAmount = 0, unsoldCogs = 0, unsoldCount = 0, wasteAmount = 0, wasteCount = 0, shrinkageAmount = 0, shrinkageCount = 0;
       const itemMetrics = {};
+      const itemDetails = {};
+      Object.values(items).forEach(item => {
+        itemDetails[item.id] = item;
+      });
 
       // Orders - sold items
       orders.forEach(order => {
         (order.items || []).forEach(item => {
+          const itemDetail = itemDetails[item.menu_item_id];
+          const itemCogs = itemDetail?.cogs || 0;
           soldAmount += item.price * item.quantity;
+          soldCogs += itemCogs * item.quantity;
           soldCount += item.quantity;
           if (!itemMetrics[item.menu_item_id]) {
-            itemMetrics[item.menu_item_id] = { sold: 0, soldCount: 0, unsold: 0, unsoldCount: 0, waste: 0, wasteCount: 0, spoilage: 0, spoilageCount: 0 };
+            itemMetrics[item.menu_item_id] = { sold: 0, soldCogs: 0, soldCount: 0, unsold: 0, unsoldCogs: 0, unsoldCount: 0, waste: 0, wasteCount: 0, shrinkage: 0, shrinkageCount: 0 };
           }
           itemMetrics[item.menu_item_id].sold += item.price * item.quantity;
+          itemMetrics[item.menu_item_id].soldCogs += itemCogs * item.quantity;
           itemMetrics[item.menu_item_id].soldCount += item.quantity;
         });
       });
 
-      // Driver inventory - unsold, waste, spoilage
+      // Driver inventory - unsold, waste, shrinkage
       driverInv.forEach(inv => {
+        const itemDetail = itemDetails[inv.menu_item_id];
+        const itemCogs = itemDetail?.cogs || 0;
         const unsoldQty = (inv.quantity_loaded || 0) - (inv.quantity_sold || 0) - (inv.quantity_spoiled || 0);
         if (!itemMetrics[inv.menu_item_id]) {
-          itemMetrics[inv.menu_item_id] = { sold: 0, soldCount: 0, unsold: 0, unsoldCount: 0, waste: 0, wasteCount: 0, spoilage: 0, spoilageCount: 0 };
+          itemMetrics[inv.menu_item_id] = { sold: 0, soldCogs: 0, soldCount: 0, unsold: 0, unsoldCogs: 0, unsoldCount: 0, waste: 0, wasteCount: 0, shrinkage: 0, shrinkageCount: 0 };
         }
         if (unsoldQty > 0) {
           unsoldAmount += inv.price * unsoldQty;
+          unsoldCogs += itemCogs * unsoldQty;
           unsoldCount += unsoldQty;
           itemMetrics[inv.menu_item_id].unsold += inv.price * unsoldQty;
+          itemMetrics[inv.menu_item_id].unsoldCogs += itemCogs * unsoldQty;
           itemMetrics[inv.menu_item_id].unsoldCount += unsoldQty;
         }
         if (inv.quantity_spoiled > 0) {
-          spoilageAmount += inv.price * inv.quantity_spoiled;
-          spoilageCount += inv.quantity_spoiled;
-          itemMetrics[inv.menu_item_id].spoilage += inv.price * inv.quantity_spoiled;
-          itemMetrics[inv.menu_item_id].spoilageCount += inv.quantity_spoiled;
+          shrinkageAmount += inv.price * inv.quantity_spoiled;
+          shrinkageCount += inv.quantity_spoiled;
+          itemMetrics[inv.menu_item_id].shrinkage += inv.price * inv.quantity_spoiled;
+          itemMetrics[inv.menu_item_id].shrinkageCount += inv.quantity_spoiled;
         }
       });
 
@@ -97,7 +109,7 @@ export default function InventoryManagement() {
         });
       });
 
-      setKpis({ sold: soldAmount, unsold: unsoldAmount, waste: wasteAmount, spoilage: spoilageAmount, soldCount, unsoldCount, wasteCount, spoilageCount });
+      setKpis({ sold: soldAmount, soldCogs, unsold: unsoldAmount, unsoldCogs, waste: wasteAmount, shrinkage: shrinkageAmount, soldCount, unsoldCount, wasteCount, shrinkageCount });
       // Store itemMetrics in state to use in rendering
       window.__itemMetrics = itemMetrics;
     } catch (error) {
@@ -105,7 +117,7 @@ export default function InventoryManagement() {
       const grouped = {};
       CATEGORIES.forEach(cat => { grouped[cat] = []; });
       setInventory(grouped);
-      setKpis({ sold: 0, unsold: 0, waste: 0, spoilage: 0, soldCount: 0, unsoldCount: 0, wasteCount: 0, spoilageCount: 0 });
+      setKpis({ sold: 0, soldCogs: 0, unsold: 0, unsoldCogs: 0, waste: 0, shrinkage: 0, soldCount: 0, unsoldCount: 0, wasteCount: 0, shrinkageCount: 0 });
       window.__itemMetrics = {};
     }
     setLoading(false);
@@ -159,14 +171,15 @@ export default function InventoryManagement() {
       {/* KPI Cards */}
       {!loading && (
         <>
-          <div className="grid md:grid-cols-4 gap-4 mb-8">
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
             <div className="bg-background border border-foreground/10 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-semibold text-foreground/60 uppercase">Sold</p>
                 <TrendingUp className="w-4 h-4 text-green-600" />
               </div>
-              <p className="text-2xl font-bold text-foreground mb-1">${kpis.sold.toFixed(2)}</p>
-              <p className="text-xs text-foreground/60">{kpis.soldCount} items ({((kpis.soldCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.spoilageCount) || 0) * 100).toFixed(1)}%)</p>
+              <p className="text-2xl font-bold text-foreground mb-0.5">${kpis.sold.toFixed(2)}</p>
+              <p className="text-xs text-foreground/60 mb-3">Value · {kpis.soldCount} items ({((kpis.soldCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.shrinkageCount) || 0) * 100).toFixed(1)}%)</p>
+              <p className="text-xs text-foreground/60">COGS: <span className="font-semibold text-foreground">${kpis.soldCogs.toFixed(2)}</span></p>
             </div>
 
             <div className="bg-background border border-foreground/10 rounded-2xl p-5">
@@ -174,8 +187,9 @@ export default function InventoryManagement() {
                 <p className="text-xs font-semibold text-foreground/60 uppercase">Unsold</p>
                 <DollarSign className="w-4 h-4 text-yellow-600" />
               </div>
-              <p className="text-2xl font-bold text-foreground mb-1">${kpis.unsold.toFixed(2)}</p>
-              <p className="text-xs text-foreground/60">{kpis.unsoldCount} items ({((kpis.unsoldCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.spoilageCount) || 0) * 100).toFixed(1)}%)</p>
+              <p className="text-2xl font-bold text-foreground mb-0.5">${kpis.unsold.toFixed(2)}</p>
+              <p className="text-xs text-foreground/60 mb-3">Value · {kpis.unsoldCount} items ({((kpis.unsoldCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.shrinkageCount) || 0) * 100).toFixed(1)}%)</p>
+              <p className="text-xs text-foreground/60">COGS: <span className="font-semibold text-foreground">${kpis.unsoldCogs.toFixed(2)}</span></p>
             </div>
 
             <div className="bg-background border border-foreground/10 rounded-2xl p-5">
@@ -184,16 +198,16 @@ export default function InventoryManagement() {
                 <AlertTriangle className="w-4 h-4 text-orange-600" />
               </div>
               <p className="text-2xl font-bold text-foreground mb-1">${kpis.waste.toFixed(2)}</p>
-              <p className="text-xs text-foreground/60">{kpis.wasteCount} items ({((kpis.wasteCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.spoilageCount) || 0) * 100).toFixed(1)}%)</p>
+              <p className="text-xs text-foreground/60">{kpis.wasteCount} items ({((kpis.wasteCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.shrinkageCount) || 0) * 100).toFixed(1)}%)</p>
             </div>
 
             <div className="bg-background border border-foreground/10 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-foreground/60 uppercase">Spoilage</p>
+                <p className="text-xs font-semibold text-foreground/60 uppercase">Shrinkage</p>
                 <AlertTriangle className="w-4 h-4 text-red-600" />
               </div>
-              <p className="text-2xl font-bold text-foreground mb-1">${kpis.spoilage.toFixed(2)}</p>
-              <p className="text-xs text-foreground/60">{kpis.spoilageCount} items ({((kpis.spoilageCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.spoilageCount) || 0) * 100).toFixed(1)}%)</p>
+              <p className="text-2xl font-bold text-foreground mb-1">${kpis.shrinkage.toFixed(2)}</p>
+              <p className="text-xs text-foreground/60">{kpis.shrinkageCount} items ({((kpis.shrinkageCount / (kpis.soldCount + kpis.unsoldCount + kpis.wasteCount + kpis.shrinkageCount) || 0) * 100).toFixed(1)}%)</p>
             </div>
           </div>
 
@@ -203,8 +217,8 @@ export default function InventoryManagement() {
               <p className="text-xs font-semibold text-foreground/60 uppercase">Gross Margin %</p>
               <TrendingUp className="w-4 h-4 text-blue-600" />
             </div>
-            <p className="text-3xl font-bold text-foreground">{((kpis.sold / (kpis.waste + kpis.spoilage) || 0) * 100).toFixed(1)}%</p>
-            <p className="text-xs text-foreground/60 mt-2">Sold vs Waste + Spoilage</p>
+            <p className="text-3xl font-bold text-foreground">{((kpis.sold / (kpis.waste + kpis.shrinkage) || 0) * 100).toFixed(1)}%</p>
+            <p className="text-xs text-foreground/60 mt-2">Sold vs Waste + Shrinkage</p>
           </div>
         </>
       )}
@@ -232,7 +246,7 @@ export default function InventoryManagement() {
                  ) : (
                    <div className="space-y-3 mb-4">
                      {items.map(item => {
-                       const metrics = window.__itemMetrics?.[item.id] || { sold: 0, soldCount: 0, unsold: 0, unsoldCount: 0, waste: 0, wasteCount: 0, spoilage: 0, spoilageCount: 0 };
+                       const metrics = window.__itemMetrics?.[item.id] || { sold: 0, soldCogs: 0, soldCount: 0, unsold: 0, unsoldCogs: 0, unsoldCount: 0, waste: 0, wasteCount: 0, shrinkage: 0, shrinkageCount: 0 };
                        return (
                        <div key={item.id} className="p-3 bg-foreground/3 rounded-lg border border-foreground/10">
                          <div className="flex items-center justify-between mb-2">
@@ -249,22 +263,24 @@ export default function InventoryManagement() {
                              className="w-16 h-8 bg-background border-foreground/20 text-foreground text-sm text-right"
                            />
                          </div>
-                         <div className="grid grid-cols-4 gap-2 text-xs">
+                         <div className="grid grid-cols-2 gap-2 text-xs mb-3">
                            <div className="bg-green-100 text-green-700 p-2 rounded">
                              <p className="font-semibold">${metrics.sold.toFixed(0)}</p>
-                             <p className="text-xs">Sold</p>
+                             <p className="text-xs">Sold Value</p>
+                             <p className="text-xs mt-1">COGS: ${metrics.soldCogs.toFixed(0)}</p>
                            </div>
                            <div className="bg-yellow-100 text-yellow-700 p-2 rounded">
                              <p className="font-semibold">${metrics.unsold.toFixed(0)}</p>
                              <p className="text-xs">Unsold ({metrics.unsoldCount})</p>
+                             <p className="text-xs mt-1">COGS: ${metrics.unsoldCogs.toFixed(0)}</p>
                            </div>
                            <div className="bg-orange-100 text-orange-700 p-2 rounded">
                              <p className="font-semibold">${metrics.waste.toFixed(0)}</p>
                              <p className="text-xs">Waste</p>
                            </div>
                            <div className="bg-red-100 text-red-700 p-2 rounded">
-                             <p className="font-semibold">${metrics.spoilage.toFixed(0)}</p>
-                             <p className="text-xs">Spoilage</p>
+                             <p className="font-semibold">${metrics.shrinkage.toFixed(0)}</p>
+                             <p className="text-xs">Shrinkage</p>
                            </div>
                          </div>
                          {metrics.unsoldCount > 0 && (
