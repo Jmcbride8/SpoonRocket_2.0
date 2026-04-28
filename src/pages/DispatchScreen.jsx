@@ -17,20 +17,30 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const driverIcon = L.divIcon({
-  html: `<div style="background:#165a34;border:2px solid white;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.25)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="6" cy="18" r="1.5"/><circle cx="18" cy="18" r="1.5"/><path d="M4 6V4h16v2" fill="white"/></svg></div>`,
-  iconSize: [32, 32], iconAnchor: [16, 16], className: ''
+const createDriverIcon = (selected = false) => L.divIcon({
+  html: `<div style="background:#165a34;border:2px solid white;border-radius:50%;width:${selected ? 40 : 32}px;height:${selected ? 40 : 32}px;display:flex;align-items:center;justify-content:center;box-shadow:0 ${selected ? 4 : 2}px ${selected ? 12 : 8}px rgba(0,0,0,0.25)"><svg xmlns="http://www.w3.org/2000/svg" width="${selected ? 18 : 16}" height="${selected ? 18 : 16}" viewBox="0 0 24 24" fill="white"><path d="M3 11h2L7 5h10l2 6h2a2 2 0 0 1 0 4h-1v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-5H9v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5H3a2 2 0 0 1 0-4z"/><circle cx="6.5" cy="17" r="1" fill="white"/><circle cx="17.5" cy="17" r="1" fill="white"/></svg></div>`,
+  iconSize: [selected ? 40 : 32, selected ? 40 : 32], iconAnchor: [selected ? 20 : 16, selected ? 20 : 16], className: ''
 });
 
-const orderIcon = L.divIcon({
-  html: `<div style="background:#3b82f6;border:2px solid white;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.2)"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M4 4h16v14c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V4z"/><line x1="8" y1="8" x2="16" y2="8" stroke="white" stroke-width="1.5"/><line x1="8" y1="12" x2="16" y2="12" stroke="white" stroke-width="1.5"/></svg></div>`,
-  iconSize: [28, 28], iconAnchor: [14, 14], className: ''
-});
-
-const selectedDriverIcon = L.divIcon({
-  html: `<div style="background:#16a34a;border:2.5px solid white;border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(22,163,74,0.4)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="6" cy="18" r="1.5"/><circle cx="18" cy="18" r="1.5"/><path d="M4 6V4h16v2" fill="white"/></svg></div>`,
-  iconSize: [40, 40], iconAnchor: [20, 20], className: ''
-});
+const createOrderIcon = (order) => {
+  const now = new Date();
+  const orderTime = new Date(order.created_date);
+  const minutesElapsed = Math.floor((now - orderTime) / (1000 * 60));
+  
+  let color = '#eab308'; // yellow
+  if (minutesElapsed > 30) color = '#22c55e'; // green
+  else if (minutesElapsed > 10) color = '#84cc16'; // lime
+  
+  return L.divIcon({
+    html: `<div style="position:relative;width:36px;height:48px;display:flex;align-items:center;justify-content:center">
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="48" viewBox="0 0 36 48" fill="${color}" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2))">
+        <path d="M18 0C8 0 0 8 0 18c0 18 18 30 18 30s18-12 18-30c0-10-8-18-18-18z"/>
+        <circle cx="18" cy="18" r="7" fill="white"/>
+      </svg>
+    </div>`,
+    iconSize: [36, 48], iconAnchor: [18, 48], className: ''
+  });
+};
 
 const CATEGORY_ICONS = { meat: '🥩', salad: '🥗', drink: '🥤', smoothie: '🍹' };
 // SVG icon strings for map popups (no emoji in map DOM)
@@ -164,7 +174,7 @@ export default function DispatchScreen() {
                 <Marker
                   key={driver.id}
                   position={[driver.latitude, driver.longitude]}
-                  icon={selectedDriver?.id === driver.id ? selectedDriverIcon : driverIcon}
+                  icon={createDriverIcon(selectedDriver?.id === driver.id)}
                   eventHandlers={{ click: () => setSelectedDriver(driver) }}
                 >
                   <Popup>
@@ -197,7 +207,7 @@ export default function DispatchScreen() {
                 <Marker
                   key={order.id}
                   position={[order.delivery_latitude, order.delivery_longitude]}
-                  icon={orderIcon}
+                  icon={createOrderIcon(order)}
                 >
                   <Popup>
                     <div className="text-sm min-w-[160px]">
@@ -211,7 +221,6 @@ export default function DispatchScreen() {
                           </div>
                         ))}
                       </div>
-                      <p className="font-semibold text-blue-700 text-sm">${order.total?.toFixed(2)}</p>
                       {selectedDriver && order.status === 'pending' && (
                         <button
                           onClick={() => assignOrder(order)}
