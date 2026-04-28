@@ -19,19 +19,18 @@ L.Icon.Default.mergeOptions({
 
 const createDriverIcon = (driverStatus, selected = false) => {
   let bgColor = '#9ca3af'; // gray - unassigned
-  let borderColor = 'white';
-  let icon = '📍'; // default pin
+  let shapeHtml = '<circle cx="50%" cy="50%" r="35%" fill="none" stroke="white" stroke-width="2"/>';
 
   if (driverStatus === 'accepted') {
     bgColor = '#22c55e'; // green - accepted/en route
-    icon = '✓';
+    shapeHtml = '<polygon points="50%,20% 80%,70% 50%,60% 20%,70%" fill="white"/>';
   } else if (driverStatus === 'assigned') {
     bgColor = '#3b82f6'; // blue - assigned but not accepted
-    icon = '⌚';
+    shapeHtml = '<rect x="30%" y="30%" width="40%" height="40%" fill="white"/>';
   }
 
   return L.divIcon({
-    html: `<div style="background:${bgColor};border:3px solid ${borderColor};border-radius:50%;width:${selected ? 40 : 32}px;height:${selected ? 40 : 32}px;display:flex;align-items:center;justify-content:center;box-shadow:0 ${selected ? 4 : 2}px ${selected ? 12 : 8}px rgba(0,0,0,0.25);font-size:${selected ? 18 : 16}px;font-weight:bold;color:white;line-height:1">${icon}</div>`,
+    html: `<div style="background:${bgColor};border:3px solid white;border-radius:50%;width:${selected ? 40 : 32}px;height:${selected ? 40 : 32}px;display:flex;align-items:center;justify-content:center;box-shadow:0 ${selected ? 4 : 2}px ${selected ? 12 : 8}px rgba(0,0,0,0.25)"><svg width="100%" height="100%" viewBox="0 0 100 100">${shapeHtml}</svg></div>`,
     iconSize: [selected ? 40 : 32, selected ? 40 : 32], 
     iconAnchor: [selected ? 20 : 16, selected ? 20 : 16], 
     className: ''
