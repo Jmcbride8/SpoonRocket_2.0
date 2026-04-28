@@ -139,23 +139,20 @@ export default function InventoryManagement() {
   };
 
   const handleSaveCarryOverWaste = async () => {
-    // Get all driver inventory records for this date and update based on carry over/waste inputs
-    const driverInv = await base44.entities.DriverInventory.filter({ shift_date: selectedDate });
+    // Get all menu items for this date and update based on carry over/waste inputs
+    const items = await base44.entities.MenuItem.filter({ menu_date: selectedDate });
 
-    for (const inv of driverInv) {
-      const carryWaste = carryOverWaste[inv.menu_item_id];
+    for (const item of items) {
+      const carryWaste = carryOverWaste[item.id];
       if (carryWaste) {
-        // Update driver inventory with carry over and waste info
         const carryQty = carryWaste.carryOver || 0;
         const wasteQty = carryWaste.markWaste || 0;
 
-        // Update the inventory record with carry over/waste breakdown
-        const updates = {
+        // Update the menu item with carry over/waste designation
+        await base44.entities.MenuItem.update(item.id, {
           quantity_carryover: carryQty,
           quantity_waste: wasteQty
-        };
-
-        await base44.entities.DriverInventory.update(inv.id, updates);
+        });
       }
     }
 
