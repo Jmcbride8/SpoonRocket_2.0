@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { ChefHat, Plus, Pencil, Trash2, Upload, X } from 'lucide-react';
+import { ChefHat, Plus, Pencil, Trash2, Upload, X, Grid3x3, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,6 +34,7 @@ export default function MenuItemLibrary() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [uploading, setUploading] = useState(false);
+  const [viewMode, setViewMode] = useState('tiles');
 
   const load = async () => {
     setLoading(true);
@@ -116,9 +117,27 @@ export default function MenuItemLibrary() {
           </div>
           <p className="text-foreground/60 text-sm">Create and manage reusable menu items</p>
         </div>
-        <Button onClick={openCreate} className="gap-2 bg-foreground text-background hover:bg-foreground/90">
-          <Plus className="w-4 h-4" /> New Recipe
-        </Button>
+        <div className="flex gap-2">
+          <div className="flex gap-1 bg-foreground/5 p-1 rounded-lg border border-foreground/10">
+            <button
+              onClick={() => setViewMode('tiles')}
+              className={`p-2 rounded transition-colors ${viewMode === 'tiles' ? 'bg-foreground text-background' : 'text-foreground hover:bg-foreground/10'}`}
+              title="Tiles view"
+            >
+              <Grid3x3 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('rows')}
+              className={`p-2 rounded transition-colors ${viewMode === 'rows' ? 'bg-foreground text-background' : 'text-foreground hover:bg-foreground/10'}`}
+              title="Rows view"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+          <Button onClick={openCreate} className="gap-2 bg-foreground text-background hover:bg-foreground/90">
+            <Plus className="w-4 h-4" /> New Recipe
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -134,7 +153,7 @@ export default function MenuItemLibrary() {
             <Plus className="w-4 h-4" /> Create First Recipe
           </Button>
         </div>
-      ) : (
+      ) : viewMode === 'tiles' ? (
         <div className="grid md:grid-cols-3 gap-4">
           {items.map(item => (
             <div key={item.id} className="bg-background border border-foreground/10 rounded-2xl overflow-hidden hover:shadow-lg transition-all">
@@ -190,6 +209,66 @@ export default function MenuItemLibrary() {
                     <Trash2 className="w-3 h-3" /> Delete
                   </button>
                 </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {items.map(item => (
+            <div key={item.id} className="bg-background border border-foreground/10 rounded-2xl p-4 flex gap-4 hover:shadow-lg transition-all">
+              {/* Image */}
+              <div className="relative w-24 h-24 bg-foreground/5 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
+                {item.image_url ? (
+                  <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="text-2xl">{CATEGORY_ICONS[item.category]}</div>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div>
+                    <h3 className="font-semibold text-foreground">{item.name}</h3>
+                    <Badge className={`text-xs ${CATEGORY_COLORS[item.category]} border-0 mt-1`}>
+                      {item.category}
+                    </Badge>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-bold text-primary">${item.price?.toFixed(2)}</p>
+                    {item.cogs && (
+                      <p className="text-xs text-foreground/60">COGS: ${item.cogs?.toFixed(2)}</p>
+                    )}
+                  </div>
+                </div>
+
+                {item.description && (
+                  <p className="text-sm text-foreground/60 mb-2 line-clamp-1">{item.description}</p>
+                )}
+
+                <div className="flex items-center gap-4 text-xs text-foreground/60">
+                  {item.calories && <span>{item.calories} cal</span>}
+                  {item.allergens && <span>⚠️ {item.allergens}</span>}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 flex-shrink-0">
+                <button
+                  onClick={() => openEdit(item)}
+                  className="p-2 rounded-lg bg-foreground/10 hover:bg-foreground/20 transition-colors text-foreground"
+                  title="Edit"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="p-2 rounded-lg bg-destructive/10 hover:bg-destructive/20 transition-colors text-destructive"
+                  title="Delete"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             </div>
           ))}
