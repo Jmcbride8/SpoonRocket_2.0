@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 import Layout from './components/Layout';
+
 import CustomerMenu from './pages/CustomerMenu';
 import CustomerHome from './pages/CustomerHome';
 import MenuManagement from './pages/MenuManagement';

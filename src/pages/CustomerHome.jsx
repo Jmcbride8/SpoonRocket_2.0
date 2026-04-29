@@ -1,20 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
-import { ShoppingBag, History, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import CustomerMenu from './CustomerMenu';
 import OrderTracking from './customer/OrderTracking';
 import OrderDelivered from './customer/OrderDelivered';
 import OrderHistory from './customer/OrderHistory';
-import { cn } from '@/lib/utils';
-
-const TABS = [
-  { key: 'menu', label: 'Menu', icon: ShoppingBag },
-  { key: 'tracking', label: 'My Order', icon: Clock },
-  { key: 'history', label: 'History', icon: History },
-];
+import { useCustomerTab } from '@/lib/CustomerTabContext';
 
 export default function CustomerHome() {
-  const [tab, setTab] = useState('menu');
+  const { tab, setTab, setTrackingBadge } = useCustomerTab();
   const [user, setUser] = useState(null);
   const [activeOrder, setActiveOrder] = useState(null);
   const [driver, setDriver] = useState(null);
@@ -68,35 +62,11 @@ export default function CustomerHome() {
   }, [user, loadActiveOrder]);
 
   const trackingBadge = activeOrder && !['delivered', 'cancelled'].includes(activeOrder.status);
+  // Sync badge to context so Layout can read it
+  useEffect(() => { setTrackingBadge(!!trackingBadge); }, [trackingBadge]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Tab bar */}
-      <div className="sticky top-0 z-20 bg-background border-b border-foreground/10 flex">
-        {TABS.map(t => {
-          const Icon = t.icon;
-          const isActive = tab === t.key;
-          return (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={cn(
-                "flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors relative",
-                isActive ? "text-foreground border-b-2 border-foreground" : "text-foreground/40 hover:text-foreground/70"
-              )}
-            >
-              <div className="relative">
-                <Icon className="w-4 h-4" />
-                {t.key === 'tracking' && trackingBadge && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full" />
-                )}
-              </div>
-              {t.label}
-            </button>
-          );
-        })}
-      </div>
-
       {/* Content */}
       <div className="flex-1">
         {tab === 'menu' && (
