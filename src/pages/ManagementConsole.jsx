@@ -446,9 +446,32 @@ export default function ManagementConsole() {
             <div className="space-y-4">
               {drivers.map(driver => {
                 const driverOrders = orders.filter(o => o.driver_id === driver.id && !['delivered', 'assigned', 'cancelled'].includes(o.status));
+                const allDriverOrders = orders.filter(o => o.driver_id === driver.id);
+                
+                // Calculate metrics
+                const deliveredOrders = allDriverOrders.filter(o => o.status === 'delivered');
+                const totalRevenue = deliveredOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+                const avgRating = deliveredOrders.length > 0 
+                  ? (deliveredOrders.reduce((sum, o) => sum + (o.customer_rating || 0), 0) / deliveredOrders.filter(o => o.customer_rating).length).toFixed(1)
+                  : '—';
+                
+                const avgDeliveryTime = (() => {
+                  const times = deliveredOrders
+                    .filter(o => o.assigned_at && o.delivered_at)
+                    .map(o => {
+                      const assigned = new Date(o.assigned_at).getTime();
+                      const delivered = new Date(o.delivered_at).getTime();
+                      return (delivered - assigned) / (1000 * 60); // minutes
+                    });
+                  if (times.length === 0) return '—';
+                  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+                  const hours = Math.floor(avg / 60);
+                  const mins = Math.floor(avg % 60);
+                  return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+                })();
                 return (
                   <div key={driver.id} className="bg-background border border-foreground/10 rounded-2xl p-4">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-4">
                       <div>
                         <p className="font-semibold text-foreground">{driver.full_name}</p>
                         <p className="text-xs text-foreground/60">{driver.city} · {driver.vehicle_plate}</p>
@@ -460,6 +483,21 @@ export default function ManagementConsole() {
                       }`}>
                         {driver.status}
                       </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div className="bg-foreground/3 rounded-lg p-2.5">
+                        <p className="text-xs text-foreground/60 font-medium mb-1">Avg Delivery Time</p>
+                        <p className="text-sm font-semibold text-foreground">{avgDeliveryTime}</p>
+                      </div>
+                      <div className="bg-foreground/3 rounded-lg p-2.5">
+                        <p className="text-xs text-foreground/60 font-medium mb-1">Total Revenue</p>
+                        <p className="text-sm font-semibold text-foreground">${totalRevenue.toFixed(0)}</p>
+                      </div>
+                      <div className="bg-foreground/3 rounded-lg p-2.5">
+                        <p className="text-xs text-foreground/60 font-medium mb-1">Avg Rating</p>
+                        <p className="text-sm font-semibold text-foreground">{avgRating}</p>
+                      </div>
                     </div>
 
                     {driverOrders.length === 0 ? (
