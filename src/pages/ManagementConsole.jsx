@@ -371,8 +371,29 @@ export default function ManagementConsole() {
           )}
 
           {activeTab === 'orders' && (
-            <div className="bg-background border border-foreground/10 rounded-2xl overflow-hidden">
-              <div className="overflow-x-auto">
+            <div className="space-y-6">
+              {/* Orders KPIs */}
+              <div className="grid grid-cols-4 gap-4">
+                <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                  <p className="text-xs text-foreground/60 font-medium mb-1">Total Orders</p>
+                  <p className="text-2xl font-bold text-foreground">{orders.length}</p>
+                </div>
+                <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                  <p className="text-xs text-foreground/60 font-medium mb-1">Pending</p>
+                  <p className="text-2xl font-bold text-foreground">{orders.filter(o => o.status === 'pending').length}</p>
+                </div>
+                <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                  <p className="text-xs text-foreground/60 font-medium mb-1">Delivered</p>
+                  <p className="text-2xl font-bold text-foreground">{orders.filter(o => o.status === 'delivered').length}</p>
+                </div>
+                <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                  <p className="text-xs text-foreground/60 font-medium mb-1">Avg Order Value</p>
+                  <p className="text-2xl font-bold text-foreground">${orders.length > 0 ? (orders.reduce((s, o) => s + (o.total || 0), 0) / orders.length).toFixed(0) : '0'}</p>
+                </div>
+              </div>
+
+              <div className="bg-background border border-foreground/10 rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-foreground/10 bg-foreground/3">
@@ -607,8 +628,36 @@ export default function ManagementConsole() {
           )}
 
            {activeTab === 'complaints' && (
-            <div className="space-y-3">
-              {complaints.length === 0 ? (
+             <div className="space-y-6">
+               {/* Complaints KPIs */}
+               <div className="grid grid-cols-4 gap-4">
+                 <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                   <p className="text-xs text-foreground/60 font-medium mb-1">Total Complaints</p>
+                   <p className="text-2xl font-bold text-foreground">{complaints.length}</p>
+                 </div>
+                 <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                   <p className="text-xs text-foreground/60 font-medium mb-1">Open</p>
+                   <p className="text-2xl font-bold text-foreground">{complaints.filter(c => c.status === 'open').length}</p>
+                 </div>
+                 <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                   <p className="text-xs text-foreground/60 font-medium mb-1">Resolution Rate</p>
+                   <p className="text-2xl font-bold text-foreground">{complaints.length > 0 ? (((complaints.filter(c => c.status === 'resolved').length) / complaints.length) * 100).toFixed(0) : '0'}%</p>
+                 </div>
+                 <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                   <p className="text-xs text-foreground/60 font-medium mb-1">Most Common</p>
+                   <p className="text-2xl font-bold text-foreground capitalize">{(() => {
+                     if (complaints.length === 0) return '—';
+                     const types = complaints.reduce((acc, c) => {
+                       acc[c.type] = (acc[c.type] || 0) + 1;
+                       return acc;
+                     }, {});
+                     return Object.entries(types).sort((a, b) => b[1] - a[1])[0]?.[0]?.replace('_', ' ') || '—';
+                   })()}</p>
+                 </div>
+               </div>
+
+               <div className="space-y-3">
+               {complaints.length === 0 ? (
                 <div className="text-center py-12 bg-background border border-foreground/10 rounded-2xl">
                   <CheckCircle className="w-10 h-10 text-foreground mx-auto mb-3" />
                   <p className="font-semibold text-foreground">No complaints!</p>
@@ -638,11 +687,12 @@ export default function ManagementConsole() {
                   )}
                   {c.resolution && <p className="text-xs text-foreground/60 mt-2 italic">Resolution: {c.resolution}</p>}
                 </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
+                ))}
+                </div>
+                </div>
+                )}
+                </>
+                )}
+                </div>
+                );
+                }
