@@ -15,13 +15,13 @@ const adminNavSections = [
   {
     links: [
       { to: '/management', label: 'Management', icon: BarChart3 },
-      { to: '/dispatch', label: 'Dispatch', icon: Map },
       { to: '/recipe-library', label: 'Recipes', icon: ChefHat },
     ]
   },
   {
     header: 'Operations',
     links: [
+      { to: '/dispatch', label: 'Dispatch', icon: Map },
       { to: '/operations', label: 'Delivery Operations', icon: Settings },
       { to: '/inventory', label: 'Inventory', icon: Package },
       { to: '/menu-planner', label: 'Planner', icon: Package },
