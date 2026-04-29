@@ -254,20 +254,20 @@ export default function MenuItemLibrary() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex gap-3 flex-shrink-0">
                 <button
                   onClick={() => openEdit(item)}
-                  className="p-2 rounded-lg bg-foreground/10 hover:bg-foreground/20 transition-colors text-foreground"
+                  className="px-4 py-2 rounded-lg bg-foreground/10 hover:bg-foreground/20 transition-colors text-foreground text-sm font-medium flex items-center gap-2"
                   title="Edit"
                 >
-                  <Pencil className="w-4 h-4" />
+                  <Pencil className="w-4 h-4" /> Edit
                 </button>
                 <button
                   onClick={() => handleDelete(item.id)}
-                  className="p-2 rounded-lg bg-destructive/10 hover:bg-destructive/20 transition-colors text-destructive"
+                  className="px-4 py-2 rounded-lg bg-destructive/10 hover:bg-destructive/20 transition-colors text-destructive text-sm font-medium flex items-center gap-2"
                   title="Delete"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4" /> Delete
                 </button>
               </div>
             </div>
