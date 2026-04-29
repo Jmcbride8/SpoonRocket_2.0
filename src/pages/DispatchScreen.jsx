@@ -16,8 +16,9 @@ const darkPopupStyle = `
   .leaflet-popup-content {
     margin: 0 !important;
   }
-  .leaflet-popup-tip {
+  .leaflet-popup-tip-container .leaflet-popup-tip {
     background: #111827 !important;
+    box-shadow: none !important;
   }
   .leaflet-popup-close-button {
     color: rgba(255,255,255,0.6) !important;
