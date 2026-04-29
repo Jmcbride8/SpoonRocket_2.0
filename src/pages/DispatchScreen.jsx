@@ -33,9 +33,9 @@ const createDriverIcon = (driverStatus, hasAssigned, selected = false) => {
   }
 
   return L.divIcon({
-    html: `<div style="background:${bgColor};border:3px solid white;border-radius:50%;width:${selected ? 40 : 32}px;height:${selected ? 40 : 32}px;display:flex;align-items:center;justify-content:center;box-shadow:0 ${selected ? 4 : 2}px ${selected ? 12 : 8}px rgba(0,0,0,0.25)"><svg width="100%" height="100%" viewBox="0 0 100 100">${shapeHtml}</svg></div>`,
-    iconSize: [selected ? 40 : 32, selected ? 40 : 32], 
-    iconAnchor: [selected ? 20 : 16, selected ? 20 : 16], 
+    html: `<div style="background:${bgColor};border:2px solid white;border-radius:50%;width:${selected ? 28 : 22}px;height:${selected ? 28 : 22}px;display:flex;align-items:center;justify-content:center;box-shadow:0 ${selected ? 3 : 2}px ${selected ? 8 : 6}px rgba(0,0,0,0.25)"><svg width="100%" height="100%" viewBox="0 0 100 100">${shapeHtml}</svg></div>`,
+    iconSize: [selected ? 28 : 22, selected ? 28 : 22], 
+    iconAnchor: [selected ? 14 : 11, selected ? 14 : 11], 
     className: ''
   });
 };
