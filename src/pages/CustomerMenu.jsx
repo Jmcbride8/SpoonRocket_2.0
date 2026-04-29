@@ -105,7 +105,7 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
           <div className="absolute top-4 right-8 text-8xl">🍽️</div>
           <div className="absolute bottom-2 left-12 text-6xl">✨</div>
         </div>
-        <div className="relative max-w-2xl mx-auto px-6 py-10 text-center">
+        <div className="relative px-6 py-10 text-center">
           <div className="flex items-center justify-center gap-2 mb-3">
             <ChefHat className="w-6 h-6 text-background/80" />
             <span className="text-background/80 text-sm font-medium tracking-widest uppercase">SpoonDash</span>
@@ -119,9 +119,9 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="px-4 py-8">
         {loading ? (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {[1,2,3,4].map(i => (
               <div key={i} className="aspect-square bg-foreground/5 rounded-2xl animate-pulse" />
             ))}
@@ -143,7 +143,7 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
                     {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-4 h-4 text-foreground/70" />; })()}
                     <h2 className="font-semibold text-foreground tracking-wide uppercase text-xs">{CATEGORY_LABELS[cat]}</h2>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                     {items.map(item => (
                       <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-foreground/8 flex flex-col">
                         {/* Image */}
