@@ -147,25 +147,6 @@ function AdminDriverLayout() {
           <span className="font-sans font-bold text-base text-background">SpoonDash</span>
         </div>
 
-        {/* Nav links - scrollable on small screens */}
-        <nav className="flex items-center gap-1 ml-6 overflow-x-auto no-scrollbar">
-          {links.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0",
-                location.pathname === to || location.pathname.startsWith(to + '/')
-                  ? "bg-background text-foreground"
-                  : "text-background/60 hover:text-background hover:bg-foreground/10"
-              )}
-            >
-              <Icon className="w-4 h-4" />
-              <span className="hidden sm:inline">{label}</span>
-            </Link>
-          ))}
-        </nav>
-
         {/* Hamburger */}
         <Button
           variant="ghost"
