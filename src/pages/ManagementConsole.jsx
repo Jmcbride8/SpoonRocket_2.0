@@ -467,30 +467,57 @@ export default function ManagementConsole() {
                     ) : (
                       <div className="space-y-2">
                         {driverOrders.map(order => (
-                          <div key={order.id} className="bg-foreground/3 rounded-lg p-2.5 flex items-center justify-between">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-foreground truncate">{order.customer_name}</p>
-                              <p className="text-xs text-foreground/60 truncate">{order.delivery_address}</p>
-                            </div>
-                            <div className="flex items-center gap-2 ml-3 shrink-0">
-                              {editingDriverOrders === order.id ? (
-                                <Select value={order.driver_id || ''} onValueChange={(val) => updateDriverOrder(order.id, val)}>
-                                  <SelectTrigger className="w-24 h-7 text-xs">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {drivers.map(d => (
-                                      <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              ) : (
-                                <span className="text-xs px-2 py-1 rounded bg-foreground/10 text-foreground font-medium">{order.status}</span>
-                              )}
-                              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingDriverOrders(editingDriverOrders === order.id ? null : order.id)} disabled={updatingOrder === order.id}>
+                          <div key={order.id} className={`rounded-lg p-3 flex flex-col gap-2 ${editingDriverOrders === order.id ? 'bg-foreground/5 border border-foreground/20' : 'bg-foreground/3'}`}>
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-foreground truncate">{order.customer_name}</p>
+                                <p className="text-xs text-foreground/60 truncate">{order.delivery_address}</p>
+                              </div>
+                              <Button size="icon" variant="ghost" className="h-6 w-6 ml-2 shrink-0" onClick={() => setEditingDriverOrders(editingDriverOrders === order.id ? null : order.id)} disabled={updatingOrder === order.id}>
                                 <Edit2 className="w-3 h-3" />
                               </Button>
                             </div>
+
+                            {editingDriverOrders === order.id && (
+                              <div className="space-y-2 pt-2 border-t border-foreground/10">
+                                <div>
+                                  <label className="text-xs font-medium text-foreground/60 block mb-1">Driver</label>
+                                  <Select value={order.driver_id || ''} onValueChange={(val) => updateDriverOrder(order.id, val)}>
+                                    <SelectTrigger className="w-full h-7 text-xs">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {drivers.map(d => (
+                                        <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-foreground/60 block mb-1">Status</label>
+                                  <Select value={order.status} onValueChange={(val) => updateOrderStatus(order.id, val)}>
+                                    <SelectTrigger className="w-full h-7 text-xs">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="pending">Pending</SelectItem>
+                                      <SelectItem value="assigned">Assigned</SelectItem>
+                                      <SelectItem value="accepted">Accepted</SelectItem>
+                                      <SelectItem value="in_transit">In Transit</SelectItem>
+                                      <SelectItem value="delivered">Delivered</SelectItem>
+                                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            )}
+
+                            {editingDriverOrders !== order.id && (
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-foreground/60">Status:</span>
+                                <span className="px-2 py-1 rounded bg-foreground/10 text-foreground font-medium">{order.status}</span>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
