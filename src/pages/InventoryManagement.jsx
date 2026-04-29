@@ -235,7 +235,7 @@ export default function InventoryManagement() {
                      {items.map(item => {
                        const metrics = window.__itemMetrics?.[item.id] || { sold: 0, soldCogs: 0, soldCount: 0, unsold: 0, unsoldCogs: 0, unsoldCount: 0, waste: 0, wasteCount: 0, shrinkage: 0, shrinkageCount: 0 };
                        return (
-                       <div key={item.id} className="border border-foreground/10 rounded-xl overflow-hidden">
+                       <div key={item.id} className="rounded-xl overflow-hidden">
                          <div className="bg-foreground/3 px-4 py-3 flex items-center justify-between">
                            <div className="flex-1">
                              <p className="text-sm font-semibold text-foreground">{item.name}</p>
