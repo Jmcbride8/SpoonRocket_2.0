@@ -156,7 +156,7 @@ export default function ManagementConsole() {
     setUpdatingOrder(null);
   };
 
-  const tabs = ['overview', 'orders', 'customers', 'complaints', 'drivers'];
+  const tabs = ['overview', 'orders', 'customers', 'drivers', 'complaints'];
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto bg-background">
