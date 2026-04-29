@@ -8,6 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 import Layout from './components/Layout';
 import CustomerMenu from './pages/CustomerMenu';
+import CustomerHome from './pages/CustomerHome';
 import MenuManagement from './pages/MenuManagement';
 import DispatchScreen from './pages/DispatchScreen';
 import ManagementConsole from './pages/ManagementConsole';
@@ -69,12 +70,25 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Default: customer
+  // Driver role (non-admin)
+  if (user?.role === 'driver') {
+    return (
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<DriverApp />} />
+          <Route path="/driver" element={<DriverApp />} />
+        </Route>
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    );
+  }
+
+  // Default: customer (role = 'user' or anything else)
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/" element={<CustomerMenu />} />
-        <Route path="/order" element={<CustomerMenu />} />
+        <Route path="/" element={<CustomerHome />} />
+        <Route path="/order" element={<CustomerHome />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

@@ -6,6 +6,7 @@ import {
   ChefHat, Map, BarChart3, Truck, Settings, ShoppingBag,
   Menu, X, LogOut, User, Package
 } from 'lucide-react';
+import RoleSwitcher from './RoleSwitcher';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -71,8 +72,8 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-foreground/10">
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
+        <div className="p-4 border-t border-foreground/10 space-y-2">
+          <div className="flex items-center gap-3 px-3 py-2">
             <div className="w-7 h-7 bg-background rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-foreground" />
             </div>
@@ -80,6 +81,9 @@ export default function Layout() {
               <p className="text-xs font-medium text-background truncate">{user?.full_name || user?.email}</p>
               <p className="text-xs text-background/60 capitalize">{user?.role || 'customer'}</p>
             </div>
+          </div>
+          <div className="px-1">
+            <RoleSwitcher currentRole={user?.role} />
           </div>
           <Button
             variant="ghost"

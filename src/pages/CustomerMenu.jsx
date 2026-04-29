@@ -29,7 +29,7 @@ const CATEGORY_COLORS = {
   smoothie: 'bg-purple-50 border-purple-200 text-purple-800',
 };
 
-export default function CustomerMenu() {
+export default function CustomerMenu({ onOrderPlaced } = {}) {
   const [menuItems, setMenuItems] = useState([]);
   const [cart, setCart] = useState({});
   const [loading, setLoading] = useState(true);
@@ -92,7 +92,7 @@ export default function CustomerMenu() {
     setCheckingOut(false);
     setAddress('');
     setInstructions('');
-    alert('Order placed! Your food is on its way 🎉');
+    if (onOrderPlaced) onOrderPlaced();
   };
 
   const categories = ['meat', 'salad', 'drink', 'smoothie'];
