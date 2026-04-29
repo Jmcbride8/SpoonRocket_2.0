@@ -664,35 +664,34 @@ export default function ManagementConsole() {
                      <p className="text-foreground/60 text-sm">Keep up the great work</p>
                    </div>
                  ) : complaints.map(c => (
-                <div key={c.id} className="bg-background border border-foreground/10 rounded-2xl p-4">
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <div>
-                      <p className="font-medium text-foreground">{c.customer_name || c.customer_email}</p>
-                      <p className="text-xs text-foreground/60 capitalize mt-0.5">{c.type?.replace('_', ' ')} · {c.city}</p>
-                    </div>
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${COMPLAINT_COLORS[c.status]}`}>
-                      {c.status?.replace('_', ' ')}
-                    </span>
-                  </div>
-                  <p className="text-sm text-foreground mb-3">{c.description}</p>
-                  {c.status === 'open' && (
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="border-foreground/20 text-foreground hover:bg-foreground/5" onClick={() => updateComplaint(c.id, 'under_review')} disabled={updatingComplaint === c.id}>
-                        Under Review
-                      </Button>
-                      <Button size="sm" className="bg-foreground text-background hover:bg-foreground/90" onClick={() => updateComplaint(c.id, 'resolved', 'Issue acknowledged and resolved.')} disabled={updatingComplaint === c.id}>
-                        Resolve
-                      </Button>
-                    </div>
-                  )}
-                  {c.resolution && <p className="text-xs text-foreground/60 mt-2 italic">Resolution: {c.resolution}</p>}
-                </div>
-                ))}
-                </div>
-                </div>
-                )}
-                </>
-                )}
-                </div>
-                );
-                }
+                   <div key={c.id} className="bg-background border border-foreground/10 rounded-2xl p-4">
+                     <div className="flex items-start justify-between gap-4 mb-2">
+                       <div>
+                         <p className="font-medium text-foreground">{c.customer_name || c.customer_email}</p>
+                         <p className="text-xs text-foreground/60 capitalize mt-0.5">{c.type?.replace('_', ' ')} · {c.city}</p>
+                       </div>
+                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${COMPLAINT_COLORS[c.status]}`}>
+                         {c.status?.replace('_', ' ')}
+                       </span>
+                     </div>
+                     <p className="text-sm text-foreground mb-3">{c.description}</p>
+                     {c.status === 'open' && (
+                       <div className="flex gap-2">
+                         <Button size="sm" variant="outline" className="border-foreground/20 text-foreground hover:bg-foreground/5" onClick={() => updateComplaint(c.id, 'under_review')} disabled={updatingComplaint === c.id}>
+                           Under Review
+                         </Button>
+                         <Button size="sm" className="bg-foreground text-background hover:bg-foreground/90" onClick={() => updateComplaint(c.id, 'resolved', 'Issue acknowledged and resolved.')} disabled={updatingComplaint === c.id}>
+                           Resolve
+                         </Button>
+                       </div>
+                     )}
+                     {c.resolution && <p className="text-xs text-foreground/60 mt-2 italic">Resolution: {c.resolution}</p>}
+                   </div>
+                 ))}
+                 </div>
+                 )}
+                 </>
+                 )}
+                 </div>
+                 );
+                 }
