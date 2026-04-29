@@ -35,6 +35,7 @@ export default function MenuItemLibrary() {
   const [form, setForm] = useState(emptyForm);
   const [uploading, setUploading] = useState(false);
   const [viewMode, setViewMode] = useState('tiles');
+  const [selectedCategories, setSelectedCategories] = useState(CATEGORIES);
 
   const load = async () => {
     setLoading(true);
@@ -107,9 +108,17 @@ export default function MenuItemLibrary() {
     }
   };
 
+  const toggleCategory = (cat) => {
+    setSelectedCategories(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const filteredItems = items.filter(item => selectedCategories.includes(item.category));
+
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto bg-background">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <ChefHat className="w-5 h-5 text-foreground" />
@@ -140,22 +149,41 @@ export default function MenuItemLibrary() {
         </div>
       </div>
 
+      {/* Category Filters */}
+      <div className="mb-6 flex flex-wrap gap-2">
+        {CATEGORIES.map(cat => (
+          <button
+            key={cat}
+            onClick={() => toggleCategory(cat)}
+            className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+              selectedCategories.includes(cat)
+                ? `${CATEGORY_COLORS[cat]} border border-current`
+                : 'bg-foreground/5 text-foreground/60 border border-foreground/10 hover:bg-foreground/10'
+            }`}
+          >
+            {CATEGORY_ICONS[cat]} {cat.charAt(0).toUpperCase() + cat.slice(1)}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <div className="grid md:grid-cols-3 gap-4">
           {[1,2,3].map(i => <div key={i} className="h-40 bg-foreground/5 rounded-2xl animate-pulse" />)}
         </div>
-      ) : items.length === 0 ? (
+      ) : filteredItems.length === 0 ? (
         <div className="text-center py-16 border-2 border-dashed border-foreground/10 rounded-2xl">
           <ChefHat className="w-10 h-10 text-foreground/60 mx-auto mb-3" />
-          <p className="font-semibold text-foreground mb-1">No recipes yet</p>
-          <p className="text-foreground/60 text-sm mb-4">Build your recipe library to reuse on your menu</p>
-          <Button onClick={openCreate} variant="outline" className="gap-2 border-foreground/20 text-foreground hover:bg-foreground/5">
-            <Plus className="w-4 h-4" /> Create First Recipe
-          </Button>
+          <p className="font-semibold text-foreground mb-1">{items.length === 0 ? 'No recipes yet' : 'No recipes match selected categories'}</p>
+          <p className="text-foreground/60 text-sm mb-4">{items.length === 0 ? 'Build your recipe library to reuse on your menu' : 'Try adjusting your filters'}</p>
+          {items.length === 0 && (
+            <Button onClick={openCreate} variant="outline" className="gap-2 border-foreground/20 text-foreground hover:bg-foreground/5">
+              <Plus className="w-4 h-4" /> Create First Recipe
+            </Button>
+          )}
         </div>
       ) : viewMode === 'tiles' ? (
         <div className="grid md:grid-cols-3 gap-4">
-          {items.map(item => (
+          {filteredItems.map(item => (
             <div key={item.id} className="bg-background border border-foreground/10 rounded-2xl overflow-hidden hover:shadow-lg transition-all">
               {/* Image */}
               <div className="relative h-32 bg-foreground/5 overflow-hidden flex items-center justify-center">
@@ -215,7 +243,7 @@ export default function MenuItemLibrary() {
         </div>
       ) : (
         <div className="space-y-3">
-          {items.map(item => (
+          {filteredItems.map(item => (
             <div key={item.id} className="bg-background border border-foreground/10 rounded-2xl p-4 flex gap-4 hover:shadow-lg transition-all">
               {/* Image */}
               <div className="relative w-24 h-24 bg-foreground/5 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
