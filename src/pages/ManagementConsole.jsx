@@ -371,7 +371,39 @@ export default function ManagementConsole() {
           )}
 
           {activeTab === 'orders' && (
-            <div className="bg-background border border-foreground/10 rounded-2xl overflow-hidden">
+            <div className="space-y-6">
+              {/* Order KPIs */}
+              {(() => {
+                const totalOrders = orders.length;
+                const pendingOrders = orders.filter(o => o.status === 'pending').length;
+                const deliveredOrders = orders.filter(o => o.status === 'delivered').length;
+                const avgOrderValue = deliveredOrders > 0 ? (orders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + (o.total || 0), 0) / deliveredOrders).toFixed(2) : 0;
+                const paidOrders = orders.filter(o => o.payment_status === 'paid').length;
+                const paymentRate = totalOrders > 0 ? ((paidOrders / totalOrders) * 100).toFixed(0) : 0;
+
+                return (
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Total Orders</p>
+                      <p className="text-2xl font-bold text-foreground">{totalOrders}</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Pending</p>
+                      <p className="text-2xl font-bold text-foreground">{pendingOrders}</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Avg Order Value</p>
+                      <p className="text-2xl font-bold text-foreground">${avgOrderValue}</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Payment Rate</p>
+                      <p className="text-2xl font-bold text-foreground">{paymentRate}%</p>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="bg-background border border-foreground/10 rounded-2xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -439,7 +471,7 @@ export default function ManagementConsole() {
                   </tbody>
                 </table>
               </div>
-            </div>
+              </div>
           )}
 
           {activeTab === 'drivers' && (
@@ -607,7 +639,39 @@ export default function ManagementConsole() {
           )}
 
            {activeTab === 'complaints' && (
-            <div className="space-y-3">
+            <div className="space-y-6">
+              {/* Complaint KPIs */}
+              {(() => {
+                const total = complaints.length;
+                const open = complaints.filter(c => c.status === 'open').length;
+                const resolved = complaints.filter(c => c.status === 'resolved').length;
+                const resolutionRate = total > 0 ? ((resolved / total) * 100).toFixed(0) : 0;
+                const types = complaints.reduce((acc, c) => { acc[c.type] = (acc[c.type] || 0) + 1; return acc; }, {});
+                const topComplaintType = Object.entries(types).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
+
+                return (
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Total Complaints</p>
+                      <p className="text-2xl font-bold text-foreground">{total}</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Open</p>
+                      <p className="text-2xl font-bold text-foreground">{open}</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Resolution Rate</p>
+                      <p className="text-2xl font-bold text-foreground">{resolutionRate}%</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Top Issue</p>
+                      <p className="text-sm font-bold text-foreground capitalize">{topComplaintType?.replace('_', ' ')}</p>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="space-y-3">
               {complaints.length === 0 ? (
                 <div className="text-center py-12 bg-background border border-foreground/10 rounded-2xl">
                   <CheckCircle className="w-10 h-10 text-foreground mx-auto mb-3" />
@@ -639,6 +703,7 @@ export default function ManagementConsole() {
                   {c.resolution && <p className="text-xs text-foreground/60 mt-2 italic">Resolution: {c.resolution}</p>}
                 </div>
               ))}
+              </div>
             </div>
           )}
         </>
