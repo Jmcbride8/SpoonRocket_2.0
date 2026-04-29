@@ -474,6 +474,67 @@ export default function ManagementConsole() {
               </div>
               )}
 
+              {activeTab === 'orders' && (
+              <div className="space-y-6">
+              {/* Orders KPIs */}
+              {(() => {
+                const total = orders.length;
+                const pending = orders.filter(o => o.status === 'pending').length;
+                const avgValue = total > 0 ? (orders.reduce((sum, o) => sum + (o.total || 0), 0) / total).toFixed(0) : 0;
+                const paid = orders.filter(o => o.payment_status === 'paid').length;
+                const paymentRate = total > 0 ? ((paid / total) * 100).toFixed(0) : 0;
+
+                return (
+                  <div className="grid grid-cols-4 gap-4 mb-4">
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Total Orders</p>
+                      <p className="text-2xl font-bold text-foreground">{total}</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Pending</p>
+                      <p className="text-2xl font-bold text-foreground">{pending}</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Avg Order Value</p>
+                      <p className="text-2xl font-bold text-foreground">${avgValue}</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Payment Rate</p>
+                      <p className="text-2xl font-bold text-foreground">{paymentRate}%</p>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="space-y-3">
+                {orders.length === 0 ? (
+                  <div className="text-center py-12 bg-background border border-foreground/10 rounded-2xl">
+                    <CheckCircle className="w-10 h-10 text-foreground mx-auto mb-3" />
+                    <p className="font-semibold text-foreground">No orders yet</p>
+                    <p className="text-foreground/60 text-sm">Orders will appear here</p>
+                  </div>
+                ) : orders.map(order => (
+                  <div key={order.id} className="bg-background border border-foreground/10 rounded-2xl p-4">
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <div>
+                        <p className="font-medium text-foreground">{order.customer_name}</p>
+                        <p className="text-xs text-foreground/60 mt-0.5">{order.customer_email}</p>
+                      </div>
+                      <span className="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700">
+                        {order.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-foreground mb-2">{order.delivery_address}</p>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-foreground/60">Total: ${order.total?.toFixed(2)}</span>
+                      <span className="text-foreground/60">Payment: {order.payment_status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              </div>
+              )}
+
               {activeTab === 'drivers' && (
             <div className="space-y-6">
               {/* Fleet KPIs */}
