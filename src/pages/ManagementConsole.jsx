@@ -443,7 +443,48 @@ export default function ManagementConsole() {
           )}
 
           {activeTab === 'drivers' && (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Fleet KPIs */}
+              {(() => {
+                const onShiftDrivers = drivers.filter(d => d.status === 'on_shift').length;
+                const allOrders = orders.filter(o => o.status === 'delivered');
+                const totalRevenue = allOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+                const avgRevenue = drivers.length > 0 ? (totalRevenue / drivers.length).toFixed(0) : 0;
+                const ratings = allOrders.filter(o => o.customer_rating).map(o => o.customer_rating);
+                const fleetAvgRating = ratings.length > 0 ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : '—';
+                const deliveryTimes = allOrders
+                  .filter(o => o.assigned_at && o.delivered_at)
+                  .map(o => (new Date(o.delivered_at).getTime() - new Date(o.assigned_at).getTime()) / (1000 * 60));
+                const fleetAvgTime = (() => {
+                  if (deliveryTimes.length === 0) return '—';
+                  const avg = deliveryTimes.reduce((a, b) => a + b, 0) / deliveryTimes.length;
+                  const hours = Math.floor(avg / 60);
+                  const mins = Math.floor(avg % 60);
+                  return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+                })();
+
+                return (
+                  <div className="grid grid-cols-4 gap-4 mb-4">
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">On Shift</p>
+                      <p className="text-2xl font-bold text-foreground">{onShiftDrivers}</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Avg Revenue/Driver</p>
+                      <p className="text-2xl font-bold text-foreground">${avgRevenue}</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Fleet Avg Time</p>
+                      <p className="text-2xl font-bold text-foreground">{fleetAvgTime}</p>
+                    </div>
+                    <div className="bg-background border border-foreground/10 rounded-lg p-3">
+                      <p className="text-xs text-foreground/60 font-medium mb-1">Fleet Avg Rating</p>
+                      <p className="text-2xl font-bold text-foreground">{fleetAvgRating}</p>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {drivers.map(driver => {
                 const driverOrders = orders.filter(o => o.driver_id === driver.id && !['delivered', 'assigned', 'cancelled'].includes(o.status));
                 const allDriverOrders = orders.filter(o => o.driver_id === driver.id);
@@ -471,32 +512,31 @@ export default function ManagementConsole() {
                 })();
                 return (
                   <div key={driver.id} className="bg-background border border-foreground/10 rounded-2xl p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
+                    <div className="flex items-center justify-between gap-4 mb-4">
+                      <div className="flex-1">
                         <p className="font-semibold text-foreground">{driver.full_name}</p>
                         <p className="text-xs text-foreground/60">{driver.city} · {driver.vehicle_plate}</p>
                       </div>
-                      <Badge className={`${
-                        driver.status === 'on_shift' ? 'bg-green-100 text-green-700' :
-                        driver.status === 'delivering' ? 'bg-blue-100 text-blue-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
-                        {driver.status}
-                      </Badge>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-3 mb-4">
-                      <div className="bg-foreground/3 rounded-lg p-2.5">
-                        <p className="text-xs text-foreground/60 font-medium mb-1">Avg Delivery Time</p>
-                        <p className="text-sm font-semibold text-foreground">{avgDeliveryTime}</p>
-                      </div>
-                      <div className="bg-foreground/3 rounded-lg p-2.5">
-                        <p className="text-xs text-foreground/60 font-medium mb-1">Total Revenue</p>
-                        <p className="text-sm font-semibold text-foreground">${totalRevenue.toFixed(0)}</p>
-                      </div>
-                      <div className="bg-foreground/3 rounded-lg p-2.5">
-                        <p className="text-xs text-foreground/60 font-medium mb-1">Avg Rating</p>
-                        <p className="text-sm font-semibold text-foreground">{avgRating}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="text-xs text-foreground/60 font-medium">Revenue</p>
+                          <p className="text-sm font-bold text-foreground">${totalRevenue.toFixed(0)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-foreground/60 font-medium">Avg Time</p>
+                          <p className="text-sm font-bold text-foreground">{avgDeliveryTime}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-foreground/60 font-medium">Rating</p>
+                          <p className="text-sm font-bold text-foreground">{avgRating}</p>
+                        </div>
+                        <Badge className={`ml-2 ${
+                          driver.status === 'on_shift' ? 'bg-green-100 text-green-700' :
+                          driver.status === 'delivering' ? 'bg-blue-100 text-blue-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {driver.status}
+                        </Badge>
                       </div>
                     </div>
 
