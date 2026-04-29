@@ -657,13 +657,13 @@ export default function ManagementConsole() {
                </div>
 
                <div className="space-y-3">
-               {complaints.length === 0 ? (
-                <div className="text-center py-12 bg-background border border-foreground/10 rounded-2xl">
-                  <CheckCircle className="w-10 h-10 text-foreground mx-auto mb-3" />
-                  <p className="font-semibold text-foreground">No complaints!</p>
-                  <p className="text-foreground/60 text-sm">Keep up the great work</p>
-                </div>
-              ) : complaints.map(c => (
+                 {complaints.length === 0 ? (
+                   <div className="text-center py-12 bg-background border border-foreground/10 rounded-2xl">
+                     <CheckCircle className="w-10 h-10 text-foreground mx-auto mb-3" />
+                     <p className="font-semibold text-foreground">No complaints!</p>
+                     <p className="text-foreground/60 text-sm">Keep up the great work</p>
+                   </div>
+                 ) : complaints.map(c => (
                 <div key={c.id} className="bg-background border border-foreground/10 rounded-2xl p-4">
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <div>
