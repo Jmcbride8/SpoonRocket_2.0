@@ -121,7 +121,7 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
 
       <div className="px-2 py-6 sm:px-4 sm:py-8">
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {[1,2,3,4].map(i => (
               <div key={i} className="aspect-square bg-foreground/5 rounded-2xl animate-pulse" />
             ))}
@@ -143,7 +143,7 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
                     {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-4 h-4 text-foreground/70" />; })()}
                     <h2 className="font-semibold text-foreground tracking-wide uppercase text-xs">{CATEGORY_LABELS[cat]}</h2>
                   </div>
-                  <div className={`grid gap-3 ${items.length === 1 ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'}`}>
+                  <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                     {items.map(item => (
                       <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-foreground/8 flex flex-col">
                         {/* Image */}
