@@ -11,13 +11,22 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CustomerTabProvider, useCustomerTab } from '@/lib/CustomerTabContext';
 
-const adminLinks = [
-  { to: '/management', label: 'Management', icon: BarChart3 },
-  { to: '/dispatch', label: 'Dispatch', icon: Map },
-  { to: '/operations', label: 'Operations', icon: Settings },
-  { to: '/inventory', label: 'Inventory', icon: Package },
-  { to: '/recipe-library', label: 'Recipes', icon: ChefHat },
-  { to: '/menu-planner', label: 'Planner', icon: Package },
+const adminNavSections = [
+  {
+    links: [
+      { to: '/management', label: 'Management', icon: BarChart3 },
+      { to: '/dispatch', label: 'Dispatch', icon: Map },
+      { to: '/recipe-library', label: 'Recipes', icon: ChefHat },
+    ]
+  },
+  {
+    header: 'Operations',
+    links: [
+      { to: '/operations', label: 'Delivery Operations', icon: Settings },
+      { to: '/inventory', label: 'Inventory', icon: Package },
+      { to: '/menu-planner', label: 'Planner', icon: Package },
+    ]
+  },
 ];
 
 const driverLinks = [
@@ -132,7 +141,7 @@ function AdminDriverLayout() {
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const links = user?.role === 'admin' ? adminLinks : driverLinks;
+  const navSections = user?.role === 'admin' ? adminNavSections : [{ links: driverLinks }];
   const handleLogout = () => base44.auth.logout('/');
 
   return (
@@ -169,22 +178,31 @@ function AdminDriverLayout() {
             <X className="w-5 h-5 text-background/60" />
           </button>
         </div>
-        <div className="flex-1 p-4 space-y-1">
-          {links.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              onClick={() => setDrawerOpen(false)}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
-                location.pathname === to
-                  ? "bg-background/10 text-background"
-                  : "text-background/60 hover:text-background hover:bg-foreground/10"
+        <div className="flex-1 p-4 space-y-1 overflow-y-auto">
+          {navSections.map((section, si) => (
+            <div key={si}>
+              {section.header && (
+                <p className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-widest text-background/30">
+                  {section.header}
+                </p>
               )}
-            >
-              <Icon className="w-4 h-4" />
-              {label}
-            </Link>
+              {section.links.map(({ to, label, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setDrawerOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                    location.pathname === to
+                      ? "bg-background/10 text-background"
+                      : "text-background/60 hover:text-background hover:bg-foreground/10"
+                  )}
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                </Link>
+              ))}
+            </div>
           ))}
         </div>
         <div className="p-4 border-t border-foreground/10 space-y-3">
