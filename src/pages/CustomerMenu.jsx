@@ -143,7 +143,7 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
                     {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-4 h-4 text-foreground/70" />; })()}
                     <h2 className="font-semibold text-foreground tracking-wide uppercase text-xs">{CATEGORY_LABELS[cat]}</h2>
                   </div>
-                  <div className={`grid gap-3 ${items.length === 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'}`}>
+                  <div className={`grid gap-3 ${items.length === 1 ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'}`}>
                     {items.map(item => (
                       <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-foreground/8 flex flex-col">
                         {/* Image */}
@@ -158,13 +158,13 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
                         </div>
 
                         {/* Name + price */}
-                        <div className="px-3 pt-3 pb-1 text-center">
+                        <div className="px-4 pt-4 pb-1 text-center">
                           <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide leading-tight">{item.name}</h3>
                           <p className="text-foreground/50 text-xs mt-0.5">${item.price.toFixed(2)}</p>
                         </div>
 
                         {/* Stepper */}
-                        <div className="flex items-center justify-center gap-3 px-3 pb-4 pt-2">
+                        <div className="flex items-center justify-center gap-3 px-4 pb-5 pt-2">
                           <button
                             onClick={() => removeFromCart(item)}
                             className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-foreground/10 transition-colors"
@@ -197,8 +197,7 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
             className="flex items-center gap-3 bg-foreground text-background px-6 py-3.5 rounded-full shadow-xl font-medium text-sm hover:bg-foreground/90 transition-all hover:scale-105"
           >
             <ShoppingCart className="w-4 h-4" />
-            <span>View order · {cartCount} item{cartCount !== 1 ? 's' : ''}</span>
-            <span className="font-bold">${total.toFixed(2)}</span>
+            <span className="font-bold">{cartCount} item{cartCount !== 1 ? 's' : ''} · ${total.toFixed(2)}</span>
           </button>
         </div>
       )}
