@@ -194,7 +194,7 @@ export default function DispatchScreen() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-foreground">
+    <div className="flex flex-col bg-foreground" style={{ height: 'calc(100vh - 3.5rem)' }}>
       {/* Top bar */}
       <div className="px-6 py-4 border-b border-foreground/10 bg-white flex items-center justify-between shrink-0">
         <div>
