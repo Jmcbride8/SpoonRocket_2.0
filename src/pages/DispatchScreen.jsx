@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const darkPopupStyle = `
+const DARK_POPUP_CSS = `
   .leaflet-popup-content-wrapper {
     background: #111827 !important;
     color: white !important;
@@ -16,7 +16,7 @@ const darkPopupStyle = `
   .leaflet-popup-content {
     margin: 0 !important;
   }
-  .leaflet-popup-tip-container .leaflet-popup-tip {
+  .leaflet-popup-tip {
     background: #111827 !important;
     box-shadow: none !important;
   }
@@ -27,14 +27,6 @@ const darkPopupStyle = `
     color: white !important;
   }
 `;
-
-// Inject once
-if (typeof document !== 'undefined' && !document.getElementById('dark-popup-style')) {
-  const style = document.createElement('style');
-  style.id = 'dark-popup-style';
-  style.textContent = darkPopupStyle;
-  document.head.appendChild(style);
-}
 import { Button } from '@/components/ui/button';
 import { Truck, CheckCircle, Beef, Salad, GlassWater, Blend, Filter } from 'lucide-react';
 
@@ -123,10 +115,11 @@ export default function DispatchScreen() {
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const load = useCallback(async () => {
-    const [dList, oList] = await Promise.all([
+    const [dList, allOrders] = await Promise.all([
       base44.entities.Driver.filter({ status: 'on_shift' }),
-      base44.entities.Order.filter({ status: 'pending' }),
+      base44.entities.Order.list('-created_date', 200),
     ]);
+    const oList = allOrders.filter(o => !['delivered', 'cancelled'].includes(o.status));
     setDrivers(dList);
     setOrders(oList);
 
@@ -227,6 +220,7 @@ export default function DispatchScreen() {
 
   return (
     <div className="flex flex-col bg-foreground" style={{ height: 'calc(100vh - 3.5rem)' }}>
+      <style>{DARK_POPUP_CSS}</style>
       {/* Top bar */}
       <div className="px-6 py-4 border-b border-foreground/10 bg-white flex items-center justify-between shrink-0">
         <div>
@@ -295,7 +289,7 @@ export default function DispatchScreen() {
                              const rem = (item.quantity_loaded || 0) - (item.quantity_sold || 0) - (item.quantity_spoiled || 0);
                              return (
                                <div key={item.id} className="flex items-center justify-between gap-2">
-                                 <span className="text-xs capitalize text-white/80">{item.menu_item_category}: {item.menu_item_name}</span>
+                                 <span className="text-xs text-white/80">{item.menu_item_name}</span>
                                  <span className={`text-xs font-bold ${rem === 0 ? 'text-red-400' : rem <= 2 ? 'text-yellow-400' : 'text-green-400'}`}>{rem}</span>
                                </div>
                              );
@@ -309,7 +303,7 @@ export default function DispatchScreen() {
               }
               return null;
             })}
-            {filteredOrders.filter(o => canServiceOrder(o)).map(order => (
+            {filteredOrders.map(order => (
                order.delivery_latitude && order.delivery_longitude ? (
                 <Marker
                   key={order.id}
