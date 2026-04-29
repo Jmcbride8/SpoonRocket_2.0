@@ -10,7 +10,7 @@ const DARK_TOOLTIP_CSS = `
     color: white !important;
     border: none !important;
     border-radius: 8px !important;
-    padding: 8px 10px !important;
+    padding: 14px 16px !important;
     box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
     font-size: 13px !important;
     white-space: normal !important;
