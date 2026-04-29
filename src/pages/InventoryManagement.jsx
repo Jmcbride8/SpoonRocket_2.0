@@ -231,74 +231,73 @@ export default function InventoryManagement() {
                 {items.length === 0 ? (
                    <p className="text-foreground/60 text-sm italic">No items configured</p>
                  ) : (
-                   <div className="space-y-3 mb-4">
+                   <div className="space-y-4 mb-4">
                      {items.map(item => {
                        const metrics = window.__itemMetrics?.[item.id] || { sold: 0, soldCogs: 0, soldCount: 0, unsold: 0, unsoldCogs: 0, unsoldCount: 0, waste: 0, wasteCount: 0, shrinkage: 0, shrinkageCount: 0 };
                        return (
-                       <div key={item.id} className="p-3 bg-foreground/3 rounded-lg border border-foreground/10">
-                         <div className="flex items-center justify-between mb-2">
-                           <div>
-                             <p className="text-sm font-medium text-foreground">{item.name}</p>
-                             <p className="text-xs text-foreground/60">${item.price}</p>
+                       <div key={item.id} className="border border-foreground/10 rounded-xl overflow-hidden">
+                         <div className="bg-foreground/3 px-4 py-3 flex items-center justify-between">
+                           <div className="flex-1">
+                             <p className="text-sm font-semibold text-foreground">{item.name}</p>
+                             <p className="text-xs text-foreground/50">${item.price}</p>
                            </div>
-                           <Input
-                             type="number"
-                             min="0"
-                             value={dailyLevels[item.id] || ''}
-                             onChange={e => setDailyLevels({ ...dailyLevels, [item.id]: e.target.value })}
-                             placeholder="0"
-                             className="w-16 h-8 bg-background border-foreground/20 text-foreground text-sm text-right"
-                           />
-                         </div>
-                         <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                           <div className="bg-green-100 text-green-700 p-2 rounded">
-                             <p className="font-semibold">${metrics.sold.toFixed(0)}</p>
-                             <p className="text-xs">Sold Value</p>
-                           </div>
-                           <div className="bg-yellow-100 text-yellow-700 p-2 rounded">
-                             <p className="font-semibold">${metrics.unsold.toFixed(0)}</p>
-                             <p className="text-xs">Unsold ({metrics.unsoldCount})</p>
-                           </div>
-                           <div className="bg-orange-100 text-orange-700 p-2 rounded">
-                             <p className="font-semibold">${metrics.waste.toFixed(0)}</p>
-                             <p className="text-xs">Waste</p>
-                           </div>
-                           <div className="bg-red-100 text-red-700 p-2 rounded">
-                             <p className="font-semibold">${metrics.shrinkage.toFixed(0)}</p>
-                             <p className="text-xs">Shrinkage</p>
+                           <div className="flex items-center gap-2">
+                             <label className="text-xs font-medium text-foreground/60">Qty</label>
+                             <Input
+                               type="number"
+                               min="0"
+                               value={dailyLevels[item.id] || ''}
+                               onChange={e => setDailyLevels({ ...dailyLevels, [item.id]: e.target.value })}
+                               placeholder="0"
+                               className="w-14 h-7 bg-background border-foreground/20 text-foreground text-sm text-center"
+                             />
                            </div>
                          </div>
-                         {metrics.unsoldCount > 0 && (
-                           <div className="flex gap-2 mt-3">
-                             <div className="flex-1">
-                               <label className="text-xs text-foreground/60 block mb-1">Carry Over</label>
-                               <Input
-                                 type="number"
-                                 min="0"
-                                 max={metrics.unsoldCount}
-                                 value={carryOverWaste[item.id]?.carryOver || ''}
-                                 onChange={e => setCarryOverWaste({ ...carryOverWaste, [item.id]: { ...carryOverWaste[item.id], carryOver: parseInt(e.target.value) || 0 } })}
-                                 placeholder="0"
-                                 className="w-full h-7 bg-background border-foreground/20 text-foreground text-xs text-center"
-                               />
+
+                         <div className="px-4 py-3 space-y-2">
+                           <div className="grid grid-cols-2 gap-2">
+                             <div className="bg-green-50 border border-green-200 rounded-lg p-2.5">
+                               <p className="text-xs text-foreground/50 font-medium mb-0.5">Sold</p>
+                               <p className="text-sm font-bold text-green-700">${metrics.sold.toFixed(0)}</p>
                              </div>
-                             <div className="flex-1">
-                               <label className="text-xs text-foreground/60 block mb-1">Mark Waste</label>
-                               <Input
-                                 type="number"
-                                 min="0"
-                                 max={metrics.unsoldCount}
-                                 value={carryOverWaste[item.id]?.markWaste || ''}
-                                 onChange={e => setCarryOverWaste({ ...carryOverWaste, [item.id]: { ...carryOverWaste[item.id], markWaste: parseInt(e.target.value) || 0 } })}
-                                 placeholder="0"
-                                 className="w-full h-7 bg-background border-foreground/20 text-foreground text-xs text-center"
-                               />
+                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5">
+                               <p className="text-xs text-foreground/50 font-medium mb-0.5">Unsold</p>
+                               <p className="text-sm font-bold text-yellow-700">${metrics.unsold.toFixed(0)} ({metrics.unsoldCount})</p>
                              </div>
                            </div>
-                         )}
+
+                           {metrics.unsoldCount > 0 && (
+                             <div className="grid grid-cols-2 gap-2 pt-1">
+                               <div className="flex-1">
+                                 <label className="text-xs font-medium text-foreground/60 block mb-1">Carry</label>
+                                 <Input
+                                   type="number"
+                                   min="0"
+                                   max={metrics.unsoldCount}
+                                   value={carryOverWaste[item.id]?.carryOver || ''}
+                                   onChange={e => setCarryOverWaste({ ...carryOverWaste, [item.id]: { ...carryOverWaste[item.id], carryOver: parseInt(e.target.value) || 0 } })}
+                                   placeholder="0"
+                                   className="w-full h-7 bg-foreground/3 border border-foreground/10 text-foreground text-xs text-center rounded-lg"
+                                 />
+                               </div>
+                               <div className="flex-1">
+                                 <label className="text-xs font-medium text-foreground/60 block mb-1">Waste</label>
+                                 <Input
+                                   type="number"
+                                   min="0"
+                                   max={metrics.unsoldCount}
+                                   value={carryOverWaste[item.id]?.markWaste || ''}
+                                   onChange={e => setCarryOverWaste({ ...carryOverWaste, [item.id]: { ...carryOverWaste[item.id], markWaste: parseInt(e.target.value) || 0 } })}
+                                   placeholder="0"
+                                   className="w-full h-7 bg-foreground/3 border border-foreground/10 text-foreground text-xs text-center rounded-lg"
+                                 />
+                               </div>
+                             </div>
+                           )}
                          </div>
-                         );
-                         })}
+                       </div>
+                       );
+                       })}
                          </div>
                          )}
                     </div>
