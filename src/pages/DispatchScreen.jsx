@@ -53,9 +53,9 @@ const createDriverIcon = (driverStatus, hasAssigned, selected = false) => {
   }
 
   return L.divIcon({
-    html: `<div style="background:${bgColor};border:2px solid white;border-radius:50%;width:${selected ? 28 : 22}px;height:${selected ? 28 : 22}px;display:flex;align-items:center;justify-content:center;box-shadow:0 ${selected ? 3 : 2}px ${selected ? 8 : 6}px rgba(0,0,0,0.25)"><svg width="100%" height="100%" viewBox="0 0 100 100">${shapeHtml}</svg></div>`,
-    iconSize: [selected ? 28 : 22, selected ? 28 : 22], 
-    iconAnchor: [selected ? 14 : 11, selected ? 14 : 11], 
+    html: `<div style="background:${bgColor};border:2px solid white;border-radius:50%;width:${selected ? 42 : 34}px;height:${selected ? 42 : 34}px;display:flex;align-items:center;justify-content:center;box-shadow:0 ${selected ? 4 : 2}px ${selected ? 12 : 8}px rgba(0,0,0,0.3)"><svg width="100%" height="100%" viewBox="0 0 100 100">${shapeHtml}</svg></div>`,
+    iconSize: [selected ? 42 : 34, selected ? 42 : 34], 
+    iconAnchor: [selected ? 21 : 17, selected ? 21 : 17], 
     className: ''
   });
 };
@@ -70,13 +70,13 @@ const createOrderIcon = (order) => {
   else if (minutesElapsed > 10) color = '#84cc16'; // lime
   
   return L.divIcon({
-    html: `<div style="position:relative;width:36px;height:48px;display:flex;align-items:center;justify-content:center">
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="48" viewBox="0 0 36 48" fill="${color}" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2))">
+    html: `<div style="position:relative;width:52px;height:68px;display:flex;align-items:center;justify-content:center">
+      <svg xmlns="http://www.w3.org/2000/svg" width="52" height="68" viewBox="0 0 36 48" fill="${color}" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.25))">
         <path d="M18 0C8 0 0 8 0 18c0 18 18 30 18 30s18-12 18-30c0-10-8-18-18-18z"/>
         <circle cx="18" cy="18" r="7" fill="white"/>
       </svg>
     </div>`,
-    iconSize: [36, 48], iconAnchor: [18, 48], className: ''
+    iconSize: [52, 68], iconAnchor: [26, 68], className: ''
   });
 };
 
