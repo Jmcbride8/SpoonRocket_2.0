@@ -445,7 +445,7 @@ export default function ManagementConsole() {
           {activeTab === 'drivers' && (
             <div className="space-y-4">
               {drivers.map(driver => {
-                const driverOrders = orders.filter(o => o.driver_id === driver.id);
+                const driverOrders = orders.filter(o => o.driver_id === driver.id && !['delivered', 'assigned', 'cancelled'].includes(o.status));
                 return (
                   <div key={driver.id} className="bg-background border border-foreground/10 rounded-2xl p-4">
                     <div className="flex items-center justify-between mb-3">
