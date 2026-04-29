@@ -181,7 +181,7 @@ export default function DriverApp() {
         ))}
       </div>
 
-      <div className="px-4 py-4">
+      <div className="px-8 py-4">
         {tab === 'orders' && (
           <div className="space-y-4">
             {/* Active order */}
