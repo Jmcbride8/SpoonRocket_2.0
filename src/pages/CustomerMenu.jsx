@@ -121,9 +121,9 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
 
       <div className="max-w-2xl mx-auto px-4 py-8">
         {loading ? (
-          <div className="grid gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {[1,2,3,4].map(i => (
-              <div key={i} className="h-32 bg-foreground/5 rounded-2xl animate-pulse" />
+              <div key={i} className="aspect-square bg-foreground/5 rounded-2xl animate-pulse" />
             ))}
           </div>
         ) : menuItems.length === 0 ? (
@@ -133,57 +133,51 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
             <p className="text-foreground/60">Check back soon — we update daily!</p>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-10">
             {categories.map(cat => {
               const items = menuItems.filter(m => m.category === cat);
               if (!items.length) return null;
               return (
                 <div key={cat}>
-                  <div className="flex items-center gap-2 mb-3">
-                    {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-4 h-4 text-foreground" />; })()}
-                    <h2 className="font-semibold text-foreground">{CATEGORY_LABELS[cat]}</h2>
+                  <div className="flex items-center gap-2 mb-4">
+                    {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-4 h-4 text-foreground/70" />; })()}
+                    <h2 className="font-semibold text-foreground tracking-wide uppercase text-xs">{CATEGORY_LABELS[cat]}</h2>
                   </div>
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
                     {items.map(item => (
-                      <div key={item.id} className="bg-background border border-foreground/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex gap-4 p-4">
+                      <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-foreground/8 flex flex-col">
+                        {/* Image */}
+                        <div className="w-full aspect-square bg-foreground/5 overflow-hidden">
                           {item.image_url ? (
-                            <img src={item.image_url} alt={item.name} className="w-24 h-24 object-cover rounded-xl flex-shrink-0" />
+                            <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
                           ) : (
-                            <div className="w-24 h-24 bg-foreground/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-foreground/10">
-                              {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-9 h-9 text-foreground/60" />; })()}
+                            <div className="w-full h-full flex items-center justify-center">
+                              {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-12 h-12 text-foreground/25" />; })()}
                             </div>
                           )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                               <h3 className="font-semibold text-foreground text-base leading-tight">{item.name}</h3>
-                               <span className="font-bold text-foreground text-lg whitespace-nowrap">${item.price.toFixed(2)}</span>
-                             </div>
-                             {item.description && (
-                               <p className="text-sm text-foreground/60 mt-1 line-clamp-2">{item.description}</p>
-                             )}
-                             {item.calories && (
-                               <p className="text-xs text-foreground/60 mt-1">{item.calories} cal</p>
-                             )}
-                            <div className="flex items-center gap-2 mt-3">
-                              {cart[item.id] ? (
-                                <div className="flex items-center gap-2">
-                                  <button onClick={() => removeFromCart(item)} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
-                                    <Minus className="w-3.5 h-3.5" />
-                                  </button>
-                                  <span className="w-5 text-center font-semibold text-sm">{cart[item.id]}</span>
-                                  <button onClick={() => addToCart(item)} className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors">
-                                    <Plus className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              ) : (
-                                <button onClick={() => addToCart(item)} className="flex items-center gap-1.5 px-4 py-1.5 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors">
-                                  <Plus className="w-3.5 h-3.5" />
-                                  Add
-                                </button>
-                              )}
-                            </div>
-                          </div>
+                        </div>
+
+                        {/* Name + price */}
+                        <div className="px-3 pt-3 pb-1 text-center">
+                          <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide leading-tight">{item.name}</h3>
+                          <p className="text-foreground/50 text-xs mt-0.5">${item.price.toFixed(2)}</p>
+                        </div>
+
+                        {/* Stepper */}
+                        <div className="flex items-center justify-center gap-3 px-3 pb-4 pt-2">
+                          <button
+                            onClick={() => removeFromCart(item)}
+                            className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-foreground/10 transition-colors"
+                          >
+                            <Minus className="w-4 h-4 text-foreground/70" />
+                          </button>
+                          <span className="w-6 text-center font-semibold text-base text-foreground">{cart[item.id] || 0}</span>
+                          <button
+                            onClick={() => addToCart(item)}
+                            className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
                     ))}
