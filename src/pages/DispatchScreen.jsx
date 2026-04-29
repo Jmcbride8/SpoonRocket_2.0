@@ -3,6 +3,37 @@ import { base44 } from '@/api/base44Client';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+
+const darkPopupStyle = `
+  .leaflet-popup-content-wrapper {
+    background: #111827 !important;
+    color: white !important;
+    border: none !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+  }
+  .leaflet-popup-content {
+    margin: 0 !important;
+  }
+  .leaflet-popup-tip {
+    background: #111827 !important;
+  }
+  .leaflet-popup-close-button {
+    color: rgba(255,255,255,0.6) !important;
+  }
+  .leaflet-popup-close-button:hover {
+    color: white !important;
+  }
+`;
+
+// Inject once
+if (typeof document !== 'undefined' && !document.getElementById('dark-popup-style')) {
+  const style = document.createElement('style');
+  style.id = 'dark-popup-style';
+  style.textContent = darkPopupStyle;
+  document.head.appendChild(style);
+}
 import { Button } from '@/components/ui/button';
 import { Truck, CheckCircle, Beef, Salad, GlassWater, Blend, Filter } from 'lucide-react';
 
