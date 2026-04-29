@@ -255,14 +255,23 @@ export default function InventoryManagement() {
                          </div>
 
                          <div className="px-4 py-3 space-y-2">
-                           <div className="grid grid-cols-2 gap-2">
-                             <div className="bg-green-50 border border-green-200 rounded-lg p-2.5">
+                           <div className="grid grid-cols-4 gap-2">
+                             <div className="bg-green-50 border border-green-200 rounded-lg p-2">
                                <p className="text-xs text-foreground/50 font-medium mb-0.5">Sold</p>
                                <p className="text-sm font-bold text-green-700">${metrics.sold.toFixed(0)}</p>
                              </div>
-                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5">
+                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
                                <p className="text-xs text-foreground/50 font-medium mb-0.5">Unsold</p>
-                               <p className="text-sm font-bold text-yellow-700">${metrics.unsold.toFixed(0)} ({metrics.unsoldCount})</p>
+                               <p className="text-sm font-bold text-yellow-700">${metrics.unsold.toFixed(0)}</p>
+                               <p className="text-xs text-yellow-600 mt-0.5">({metrics.unsoldCount})</p>
+                             </div>
+                             <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
+                               <p className="text-xs text-foreground/50 font-medium mb-0.5">Waste</p>
+                               <p className="text-sm font-bold text-orange-700">${metrics.waste.toFixed(0)}</p>
+                             </div>
+                             <div className="bg-red-50 border border-red-200 rounded-lg p-2">
+                               <p className="text-xs text-foreground/50 font-medium mb-0.5">Shrinkage</p>
+                               <p className="text-sm font-bold text-red-700">${metrics.shrinkage.toFixed(0)}</p>
                              </div>
                            </div>
 
