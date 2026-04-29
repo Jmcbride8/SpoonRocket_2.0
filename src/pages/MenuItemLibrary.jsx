@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { ChefHat, Plus, Pencil, Trash2, Upload, X, Grid3x3, List } from 'lucide-react';
+import { ChefHat, Plus, Pencil, Trash2, Upload, X, Grid3x3, List, Beef, Salad, GlassWater, Blend } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 
 const CATEGORIES = ['meat', 'salad', 'drink', 'smoothie'];
 const CATEGORY_ICONS = { meat: '🥩', salad: '🥗', drink: '🥤', smoothie: '🍹' };
+const CATEGORY_ICON_COMPONENTS = { meat: Beef, salad: Salad, drink: GlassWater, smoothie: Blend };
 const CATEGORY_COLORS = {
   meat: 'bg-orange-100 text-orange-700',
   salad: 'bg-green-100 text-green-700',
