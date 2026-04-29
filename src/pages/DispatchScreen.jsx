@@ -251,26 +251,26 @@ export default function DispatchScreen() {
                     eventHandlers={{ click: () => setSelectedDriver(driver) }}
                   >
                     <Popup>
-                      <div className="text-sm min-w-[160px]">
-                        <p className="font-bold mb-0.5">{driver.full_name}</p>
-                        <p className="text-gray-500 text-xs mb-2">{driver.city} · {driver.vehicle_plate}</p>
-                        <p className="text-xs font-semibold text-gray-600 mb-1">Inventory remaining:</p>
-                        {(driverInventories[driver.id] || []).length === 0 ? (
-                          <p className="text-xs text-gray-400 italic">No inventory loaded</p>
-                        ) : (
-                          <div className="flex flex-col gap-1">
-                            {(driverInventories[driver.id] || []).map(item => {
-                              const rem = (item.quantity_loaded || 0) - (item.quantity_sold || 0) - (item.quantity_spoiled || 0);
-                              return (
-                                <div key={item.id} className="flex items-center justify-between gap-2">
-                                  <span className="text-xs capitalize text-gray-700">{item.menu_item_category}: {item.menu_item_name}</span>
-                                  <span className={`text-xs font-bold ${rem === 0 ? 'text-red-500' : rem <= 2 ? 'text-yellow-600' : 'text-green-600'}`}>{rem}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
+                     <div className="text-sm min-w-[160px] bg-gray-900 text-white rounded p-2 -m-3">
+                       <p className="font-bold mb-0.5">{driver.full_name}</p>
+                       <p className="text-white/50 text-xs mb-2">{driver.city} · {driver.vehicle_plate}</p>
+                       <p className="text-xs font-semibold text-white/70 mb-1">Inventory remaining:</p>
+                       {(driverInventories[driver.id] || []).length === 0 ? (
+                         <p className="text-xs text-white/40 italic">No inventory loaded</p>
+                       ) : (
+                         <div className="flex flex-col gap-1">
+                           {(driverInventories[driver.id] || []).map(item => {
+                             const rem = (item.quantity_loaded || 0) - (item.quantity_sold || 0) - (item.quantity_spoiled || 0);
+                             return (
+                               <div key={item.id} className="flex items-center justify-between gap-2">
+                                 <span className="text-xs capitalize text-white/80">{item.menu_item_category}: {item.menu_item_name}</span>
+                                 <span className={`text-xs font-bold ${rem === 0 ? 'text-red-400' : rem <= 2 ? 'text-yellow-400' : 'text-green-400'}`}>{rem}</span>
+                               </div>
+                             );
+                           })}
+                         </div>
+                       )}
+                     </div>
                     </Popup>
                   </Marker>
                 ) : null;
@@ -285,14 +285,14 @@ export default function DispatchScreen() {
                   icon={createOrderIcon(order)}
                 >
                   <Popup>
-                    <div className="text-sm min-w-[160px]">
+                    <div className="text-sm min-w-[160px] bg-gray-900 text-white rounded p-2 -m-3">
                       <p className="font-bold mb-0.5">{order.customer_name}</p>
-                      <p className="text-gray-500 text-xs mb-2">{order.delivery_address}</p>
+                      <p className="text-white/50 text-xs mb-2">{order.delivery_address}</p>
                       <div className="flex flex-col gap-0.5 mb-2">
                         {(order.items || []).map((item, i) => (
                           <div key={i} className="flex items-center justify-between text-xs">
-                            <span className="text-gray-700">{item.name}</span>
-                            <span className="text-gray-500 ml-2">×{item.quantity}</span>
+                            <span className="text-white/80">{item.name}</span>
+                            <span className="text-white/50 ml-2">×{item.quantity}</span>
                           </div>
                         ))}
                       </div>
@@ -300,7 +300,7 @@ export default function DispatchScreen() {
                         <button
                           onClick={() => assignOrder(order)}
                           disabled={assigning === order.id}
-                          className="mt-2 w-full bg-primary text-white rounded px-2 py-1 text-xs font-medium"
+                          className="mt-2 w-full bg-white text-gray-900 rounded px-2 py-1 text-xs font-medium hover:bg-white/90"
                         >
                           {assigning === order.id ? 'Assigning...' : `Assign to ${selectedDriver.full_name}`}
                         </button>
