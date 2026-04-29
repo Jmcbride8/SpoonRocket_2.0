@@ -121,7 +121,7 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
 
       <div className="px-2 py-6 sm:px-4 sm:py-8">
         {loading ? (
-          <div className="grid gap-3" style={{gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))'}}>
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {[1,2,3,4].map(i => (
               <div key={i} className="aspect-square bg-foreground/5 rounded-2xl animate-pulse" />
             ))}
@@ -133,7 +133,7 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
             <p className="text-foreground/60">Check back soon — we update daily!</p>
           </div>
         ) : (
-          <div className="grid gap-3" style={{gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))'}}>
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {menuItems.map(item => (
               <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-foreground/8 flex flex-col">
                 {/* Image */}
