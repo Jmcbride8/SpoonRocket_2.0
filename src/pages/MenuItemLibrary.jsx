@@ -151,19 +151,23 @@ export default function MenuItemLibrary() {
 
       {/* Category Filters */}
       <div className="mb-6 flex flex-wrap gap-2">
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat}
-            onClick={() => toggleCategory(cat)}
-            className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-              selectedCategories.includes(cat)
-                ? `${CATEGORY_COLORS[cat]} border border-current`
-                : 'bg-foreground/5 text-foreground/60 border border-foreground/10 hover:bg-foreground/10'
-            }`}
-          >
-            {CATEGORY_ICONS[cat]} {cat.charAt(0).toUpperCase() + cat.slice(1)}
-          </button>
-        ))}
+        {CATEGORIES.map(cat => {
+          const IconComponent = CATEGORY_ICON_COMPONENTS[cat];
+          return (
+            <button
+              key={cat}
+              onClick={() => toggleCategory(cat)}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
+                selectedCategories.includes(cat)
+                  ? `${CATEGORY_COLORS[cat]} border border-current`
+                  : 'bg-foreground/5 text-foreground/60 border border-foreground/10 hover:bg-foreground/10'
+              }`}
+            >
+              <IconComponent className="w-4 h-4" />
+              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </button>
+          );
+        })}
       </div>
 
       {loading ? (
