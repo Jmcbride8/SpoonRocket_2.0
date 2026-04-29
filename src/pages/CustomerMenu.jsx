@@ -133,58 +133,44 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
             <p className="text-foreground/60">Check back soon — we update daily!</p>
           </div>
         ) : (
-          <div className="space-y-10">
-            {categories.map(cat => {
-              const items = menuItems.filter(m => m.category === cat);
-              if (!items.length) return null;
-              return (
-                <div key={cat}>
-                  <div className="flex items-center gap-2 mb-4">
-                    {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-4 h-4 text-foreground/70" />; })()}
-                    <h2 className="font-semibold text-foreground tracking-wide uppercase text-xs">{CATEGORY_LABELS[cat]}</h2>
-                  </div>
-                  <div className="grid gap-3" style={{gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))'}}>
-                    {items.map(item => (
-                      <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-foreground/8 flex flex-col">
-                        {/* Image */}
-                        <div className="w-full aspect-square bg-foreground/5 overflow-hidden">
-                          {item.image_url ? (
-                            <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[cat]; return <CatIcon className="w-12 h-12 text-foreground/25" />; })()}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Name + price */}
-                        <div className="px-4 pt-4 pb-1 text-center">
-                          <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide leading-tight">{item.name}</h3>
-                          <p className="text-foreground/50 text-xs mt-0.5">${item.price.toFixed(2)}</p>
-                        </div>
-
-                        {/* Stepper */}
-                        <div className="flex items-center justify-center gap-3 px-4 pb-5 pt-2">
-                          <button
-                            onClick={() => removeFromCart(item)}
-                            className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-foreground/10 transition-colors"
-                          >
-                            <Minus className="w-4 h-4 text-foreground/70" />
-                          </button>
-                          <span className="w-6 text-center font-semibold text-base text-foreground">{cart[item.id] || 0}</span>
-                          <button
-                            onClick={() => addToCart(item)}
-                            className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+          <div className="grid gap-3" style={{gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))'}}>
+            {menuItems.map(item => (
+              <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-foreground/8 flex flex-col">
+                {/* Image */}
+                <div className="w-full aspect-square bg-foreground/5 overflow-hidden">
+                  {item.image_url ? (
+                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[item.category]; return <CatIcon className="w-12 h-12 text-foreground/25" />; })()}
+                    </div>
+                  )}
                 </div>
-              );
-            })}
+
+                {/* Name + price */}
+                <div className="px-4 pt-4 pb-1 text-center">
+                  <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide leading-tight">{item.name}</h3>
+                  <p className="text-foreground/50 text-xs mt-0.5">${item.price.toFixed(2)}</p>
+                </div>
+
+                {/* Stepper */}
+                <div className="flex items-center justify-center gap-3 px-4 pb-5 pt-2">
+                  <button
+                    onClick={() => removeFromCart(item)}
+                    className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-foreground/10 transition-colors"
+                  >
+                    <Minus className="w-4 h-4 text-foreground/70" />
+                  </button>
+                  <span className="w-6 text-center font-semibold text-base text-foreground">{cart[item.id] || 0}</span>
+                  <button
+                    onClick={() => addToCart(item)}
+                    className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
