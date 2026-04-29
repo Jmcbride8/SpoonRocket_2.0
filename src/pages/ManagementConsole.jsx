@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts';
-import { DollarSign, ShoppingBag, Truck, Star, AlertCircle, TrendingUp, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { DollarSign, ShoppingBag, Truck, Star, AlertCircle, TrendingUp, CheckCircle, Clock, XCircle, Edit2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, subDays, startOfYear, endOfYear } from 'date-fns';
 
 const StatCard = ({ icon: Icon, label, value, sub, color }) => (
@@ -29,16 +30,21 @@ const COMPLAINT_COLORS = {
 export default function ManagementConsole() {
   const [orders, setOrders] = useState([]);
   const [complaints, setComplaints] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [updatingComplaint, setUpdatingComplaint] = useState(null);
   const [financialPeriod, setFinancialPeriod] = useState('day'); // day, week, ytd
+  const [editingOrderStatus, setEditingOrderStatus] = useState(null);
+  const [editingDriverOrders, setEditingDriverOrders] = useState(null);
+  const [updatingOrder, setUpdatingOrder] = useState(null);
 
   useEffect(() => {
     Promise.all([
       base44.entities.Order.list('-created_date', 500),
       base44.entities.Complaint.list('-created_date', 100),
-    ]).then(([o, c]) => { setOrders(o); setComplaints(c); setLoading(false); });
+      base44.entities.Driver.list(),
+    ]).then(([o, c, d]) => { setOrders(o); setComplaints(c); setDrivers(d); setLoading(false); });
   }, []);
 
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -131,7 +137,26 @@ export default function ManagementConsole() {
   const avgLTV = uniqueCustomers > 0 ? totalLTV / uniqueCustomers : 0;
   const repeatCustomers = customerList.filter(c => c.orders > 1).length;
 
-  const tabs = ['overview', 'orders', 'customers', 'complaints'];
+  const updateOrderStatus = async (orderId, newStatus) => {
+    setUpdatingOrder(orderId);
+    await base44.entities.Order.update(orderId, { status: newStatus });
+    const updated = await base44.entities.Order.list('-created_date', 500);
+    setOrders(updated);
+    setEditingOrderStatus(null);
+    setUpdatingOrder(null);
+  };
+
+  const updateDriverOrder = async (orderId, newDriverId) => {
+    setUpdatingOrder(orderId);
+    const selectedDriver = drivers.find(d => d.id === newDriverId);
+    await base44.entities.Order.update(orderId, { driver_id: newDriverId, driver_name: selectedDriver.full_name });
+    const updated = await base44.entities.Order.list('-created_date', 500);
+    setOrders(updated);
+    setEditingDriverOrders(null);
+    setUpdatingOrder(null);
+  };
+
+  const tabs = ['overview', 'orders', 'customers', 'complaints', 'drivers'];
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto bg-background">
@@ -357,6 +382,7 @@ export default function ManagementConsole() {
                       <th className="text-left px-4 py-3 text-xs font-semibold text-foreground/60 uppercase tracking-wide">Driver</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-foreground/60 uppercase tracking-wide">Status</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-foreground/60 uppercase tracking-wide">Rating</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-foreground/60 uppercase tracking-wide">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -370,15 +396,31 @@ export default function ManagementConsole() {
                         <td className="px-4 py-3 font-semibold text-foreground">${order.total?.toFixed(2)}</td>
                         <td className="px-4 py-3 text-foreground/60">{order.driver_name || '—'}</td>
                         <td className="px-4 py-3">
-                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                            order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                            order.status === 'in_transit' ? 'bg-purple-100 text-purple-700' :
-                            order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                            order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                            'bg-blue-100 text-blue-700'
-                          }`}>
-                            {order.status}
-                          </span>
+                          {editingOrderStatus === order.id ? (
+                            <Select value={order.status} onValueChange={(val) => updateOrderStatus(order.id, val)}>
+                              <SelectTrigger className="w-32 h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="assigned">Assigned</SelectItem>
+                                <SelectItem value="accepted">Accepted</SelectItem>
+                                <SelectItem value="in_transit">In Transit</SelectItem>
+                                <SelectItem value="delivered">Delivered</SelectItem>
+                                <SelectItem value="cancelled">Cancelled</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                              order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                              order.status === 'in_transit' ? 'bg-purple-100 text-purple-700' :
+                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                              order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                              'bg-blue-100 text-blue-700'
+                            }`}>
+                              {order.status}
+                            </span>
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           {order.customer_rating ? (
@@ -386,6 +428,11 @@ export default function ManagementConsole() {
                               ⭐ {order.customer_rating}
                             </span>
                           ) : '—'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditingOrderStatus(editingOrderStatus === order.id ? null : order.id)} disabled={updatingOrder === order.id}>
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -395,7 +442,66 @@ export default function ManagementConsole() {
             </div>
           )}
 
-          {activeTab === 'complaints' && (
+          {activeTab === 'drivers' && (
+            <div className="space-y-4">
+              {drivers.map(driver => {
+                const driverOrders = orders.filter(o => o.driver_id === driver.id);
+                return (
+                  <div key={driver.id} className="bg-background border border-foreground/10 rounded-2xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="font-semibold text-foreground">{driver.full_name}</p>
+                        <p className="text-xs text-foreground/60">{driver.city} · {driver.vehicle_plate}</p>
+                      </div>
+                      <Badge className={`${
+                        driver.status === 'on_shift' ? 'bg-green-100 text-green-700' :
+                        driver.status === 'delivering' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {driver.status}
+                      </Badge>
+                    </div>
+
+                    {driverOrders.length === 0 ? (
+                      <p className="text-xs text-foreground/60 italic">No assigned orders</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {driverOrders.map(order => (
+                          <div key={order.id} className="bg-foreground/3 rounded-lg p-2.5 flex items-center justify-between">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">{order.customer_name}</p>
+                              <p className="text-xs text-foreground/60 truncate">{order.delivery_address}</p>
+                            </div>
+                            <div className="flex items-center gap-2 ml-3 shrink-0">
+                              {editingDriverOrders === order.id ? (
+                                <Select value={order.driver_id || ''} onValueChange={(val) => updateDriverOrder(order.id, val)}>
+                                  <SelectTrigger className="w-24 h-7 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {drivers.map(d => (
+                                      <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <span className="text-xs px-2 py-1 rounded bg-foreground/10 text-foreground font-medium">{order.status}</span>
+                              )}
+                              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingDriverOrders(editingDriverOrders === order.id ? null : order.id)} disabled={updatingOrder === order.id}>
+                                <Edit2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+           {activeTab === 'complaints' && (
             <div className="space-y-3">
               {complaints.length === 0 ? (
                 <div className="text-center py-12 bg-background border border-foreground/10 rounded-2xl">
