@@ -133,44 +133,52 @@ export default function CustomerMenu({ onOrderPlaced } = {}) {
             <p className="text-foreground/60">Check back soon — we update daily!</p>
           </div>
         ) : (
-          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {menuItems.map(item => (
-              <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-foreground/8 flex flex-col">
-                {/* Image */}
-                <div className="w-full aspect-square bg-foreground/5 overflow-hidden">
-                  {item.image_url ? (
-                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[item.category]; return <CatIcon className="w-12 h-12 text-foreground/25" />; })()}
-                    </div>
-                  )}
-                </div>
+          <div className="flex justify-center">
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 w-full md:max-w-5xl">
+              {menuItems.map(item => (
+                <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-foreground/8 flex flex-col">
+                  {/* Image */}
+                  <div className="w-full aspect-square bg-foreground/5 overflow-hidden">
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        {(() => { const CatIcon = CATEGORY_ICON_COMPONENTS[item.category]; return <CatIcon className="w-12 h-12 text-foreground/25" />; })()}
+                      </div>
+                    )}
+                  </div>
 
-                {/* Name + price */}
-                <div className="px-4 pt-4 pb-1 text-center">
-                  <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide leading-tight">{item.name}</h3>
-                  <p className="text-foreground/50 text-xs mt-0.5">${item.price.toFixed(2)}</p>
-                </div>
+                  {/* Name + price + description + calories (desktop) */}
+                  <div className="px-4 pt-4 pb-1 text-center flex-1 flex flex-col">
+                    <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide leading-tight">{item.name}</h3>
+                    <p className="text-foreground/50 text-xs mt-0.5">${item.price.toFixed(2)}</p>
+                    {item.description && (
+                      <p className="text-foreground/60 text-xs mt-2 hidden md:block line-clamp-2">{item.description}</p>
+                    )}
+                    {item.calories && (
+                      <p className="text-foreground/50 text-xs mt-1 hidden md:block">{item.calories} cal</p>
+                    )}
+                  </div>
 
-                {/* Stepper */}
-                <div className="flex items-center justify-center gap-3 px-4 pb-5 pt-2">
-                  <button
-                    onClick={() => removeFromCart(item)}
-                    className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-foreground/10 transition-colors"
-                  >
-                    <Minus className="w-4 h-4 text-foreground/70" />
-                  </button>
-                  <span className="w-6 text-center font-semibold text-base text-foreground">{cart[item.id] || 0}</span>
-                  <button
-                    onClick={() => addToCart(item)}
-                    className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
+                  {/* Stepper */}
+                  <div className="flex items-center justify-center gap-3 px-4 pb-5 pt-2">
+                    <button
+                      onClick={() => removeFromCart(item)}
+                      className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-foreground/10 transition-colors"
+                    >
+                      <Minus className="w-4 h-4 text-foreground/70" />
+                    </button>
+                    <span className="w-6 text-center font-semibold text-base text-foreground">{cart[item.id] || 0}</span>
+                    <button
+                      onClick={() => addToCart(item)}
+                      className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
