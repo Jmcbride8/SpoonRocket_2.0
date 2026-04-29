@@ -254,31 +254,31 @@ export default function InventoryManagement() {
                            </div>
                          </div>
 
-                         <div className="px-4 py-3 space-y-2">
+                         <div className="px-4 py-3 space-y-3">
                            <div className="grid grid-cols-4 gap-2">
-                             <div className="bg-green-50 border border-green-200 rounded-lg p-2">
-                               <p className="text-xs text-foreground/50 font-medium mb-0.5">Sold</p>
+                             <div className="bg-green-100/40 rounded-lg p-2.5">
+                               <p className="text-xs text-green-700/70 font-medium mb-1">Sold</p>
                                <p className="text-sm font-bold text-green-700">${metrics.sold.toFixed(0)}</p>
                              </div>
-                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
-                               <p className="text-xs text-foreground/50 font-medium mb-0.5">Unsold</p>
+                             <div className="bg-yellow-100/40 rounded-lg p-2.5">
+                               <p className="text-xs text-yellow-700/70 font-medium mb-1">Unsold</p>
                                <p className="text-sm font-bold text-yellow-700">${metrics.unsold.toFixed(0)}</p>
-                               <p className="text-xs text-yellow-600 mt-0.5">({metrics.unsoldCount})</p>
+                               <p className="text-xs text-yellow-700/60 mt-1">({metrics.unsoldCount})</p>
                              </div>
-                             <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
-                               <p className="text-xs text-foreground/50 font-medium mb-0.5">Waste</p>
+                             <div className="bg-orange-100/40 rounded-lg p-2.5">
+                               <p className="text-xs text-orange-700/70 font-medium mb-1">Waste</p>
                                <p className="text-sm font-bold text-orange-700">${metrics.waste.toFixed(0)}</p>
                              </div>
-                             <div className="bg-red-50 border border-red-200 rounded-lg p-2">
-                               <p className="text-xs text-foreground/50 font-medium mb-0.5">Shrinkage</p>
+                             <div className="bg-red-100/40 rounded-lg p-2.5">
+                               <p className="text-xs text-red-700/70 font-medium mb-1">Shrinkage</p>
                                <p className="text-sm font-bold text-red-700">${metrics.shrinkage.toFixed(0)}</p>
                              </div>
                            </div>
 
                            {metrics.unsoldCount > 0 && (
-                             <div className="grid grid-cols-2 gap-2 pt-1">
+                             <div className="grid grid-cols-2 gap-3 pt-1">
                                <div className="flex-1">
-                                 <label className="text-xs font-medium text-foreground/60 block mb-1">Carry</label>
+                                 <label className="text-xs font-medium text-foreground/60 block mb-1.5">Carry</label>
                                  <Input
                                    type="number"
                                    min="0"
@@ -286,11 +286,11 @@ export default function InventoryManagement() {
                                    value={carryOverWaste[item.id]?.carryOver || ''}
                                    onChange={e => setCarryOverWaste({ ...carryOverWaste, [item.id]: { ...carryOverWaste[item.id], carryOver: parseInt(e.target.value) || 0 } })}
                                    placeholder="0"
-                                   className="w-full h-7 bg-foreground/3 border border-foreground/10 text-foreground text-xs text-center rounded-lg"
+                                   className="w-full h-8 bg-foreground/4 border-0 text-foreground text-xs text-center rounded-lg focus-visible:ring-1 focus-visible:ring-foreground/30"
                                  />
                                </div>
                                <div className="flex-1">
-                                 <label className="text-xs font-medium text-foreground/60 block mb-1">Waste</label>
+                                 <label className="text-xs font-medium text-foreground/60 block mb-1.5">Waste</label>
                                  <Input
                                    type="number"
                                    min="0"
@@ -298,7 +298,7 @@ export default function InventoryManagement() {
                                    value={carryOverWaste[item.id]?.markWaste || ''}
                                    onChange={e => setCarryOverWaste({ ...carryOverWaste, [item.id]: { ...carryOverWaste[item.id], markWaste: parseInt(e.target.value) || 0 } })}
                                    placeholder="0"
-                                   className="w-full h-7 bg-foreground/3 border border-foreground/10 text-foreground text-xs text-center rounded-lg"
+                                   className="w-full h-8 bg-foreground/4 border-0 text-foreground text-xs text-center rounded-lg focus-visible:ring-1 focus-visible:ring-foreground/30"
                                  />
                                </div>
                              </div>
