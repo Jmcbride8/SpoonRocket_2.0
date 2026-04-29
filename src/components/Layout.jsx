@@ -63,30 +63,6 @@ function CustomerLayoutContent() {
           <span className="font-sans font-bold text-base text-background">SpoonDash</span>
         </div>
 
-        {/* Nav tabs - desktop & mobile */}
-        <nav className="flex items-center gap-1 ml-6 overflow-x-auto no-scrollbar">
-          {customerTabs.map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0",
-                tab === key
-                  ? "bg-background text-foreground"
-                  : "text-background/60 hover:text-background hover:bg-foreground/10"
-              )}
-            >
-              <div className="relative">
-                <Icon className="w-4 h-4" />
-                {key === 'tracking' && trackingBadge && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full" />
-                )}
-              </div>
-              <span className="hidden sm:inline">{label}</span>
-            </button>
-          ))}
-        </nav>
-
         {/* Hamburger */}
         <Button
           variant="ghost"
