@@ -472,9 +472,9 @@ export default function ManagementConsole() {
                 </table>
               </div>
               </div>
-          )}
+              )}
 
-          {activeTab === 'drivers' && (
+              {activeTab === 'drivers' && (
             <div className="space-y-6">
               {/* Fleet KPIs */}
               {(() => {
@@ -704,10 +704,10 @@ export default function ManagementConsole() {
                 </div>
               ))}
               </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
+              </div>
+              )}
+              </>
+              )}
+              </div>
+              );
+              }
