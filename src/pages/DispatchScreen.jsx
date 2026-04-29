@@ -1,30 +1,26 @@
 import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const DARK_POPUP_CSS = `
-  .leaflet-popup-content-wrapper {
+const DARK_TOOLTIP_CSS = `
+  .leaflet-tooltip {
     background: #111827 !important;
     color: white !important;
     border: none !important;
-    padding: 0 !important;
     border-radius: 8px !important;
+    padding: 8px 10px !important;
     box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+    font-size: 13px !important;
+    white-space: normal !important;
+    min-width: 160px !important;
   }
-  .leaflet-popup-content {
-    margin: 0 !important;
+  .leaflet-tooltip-bottom::before {
+    border-bottom-color: #111827 !important;
   }
-  .leaflet-popup-tip {
-    background: #111827 !important;
-    box-shadow: none !important;
-  }
-  .leaflet-popup-close-button {
-    color: rgba(255,255,255,0.6) !important;
-  }
-  .leaflet-popup-close-button:hover {
-    color: white !important;
+  .leaflet-tooltip-top::before {
+    border-top-color: #111827 !important;
   }
 `;
 import { Button } from '@/components/ui/button';
@@ -220,7 +216,7 @@ export default function DispatchScreen() {
 
   return (
     <div className="flex flex-col bg-foreground" style={{ height: 'calc(100vh - 3.5rem)' }}>
-      <style>{DARK_POPUP_CSS}</style>
+      <style>{DARK_TOOLTIP_CSS}</style>
       {/* Top bar */}
       <div className="px-6 py-4 border-b border-foreground/10 bg-white flex items-center justify-between shrink-0">
         <div>
@@ -276,28 +272,24 @@ export default function DispatchScreen() {
                     icon={createDriverIcon(getDriverStatus(driver), hasAssignedNotAccepted(driver), selectedDriver?.id === driver.id)}
                     eventHandlers={{ click: () => setSelectedDriver(driver) }}
                   >
-                    <Popup>
-                     <div className="text-sm min-w-[160px] bg-gray-900 text-white rounded p-2 -m-3">
-                       <p className="font-bold mb-0.5">{driver.full_name}</p>
-                       <p className="text-white/50 text-xs mb-2">{driver.city} · {driver.vehicle_plate}</p>
-                       <p className="text-xs font-semibold text-white/70 mb-1">Inventory remaining:</p>
-                       {(driverInventories[driver.id] || []).length === 0 ? (
-                         <p className="text-xs text-white/40 italic">No inventory loaded</p>
-                       ) : (
-                         <div className="flex flex-col gap-1">
-                           {(driverInventories[driver.id] || []).map(item => {
-                             const rem = (item.quantity_loaded || 0) - (item.quantity_sold || 0) - (item.quantity_spoiled || 0);
-                             return (
-                               <div key={item.id} className="flex items-center justify-between gap-2">
-                                 <span className="text-xs text-white/80">{item.menu_item_name}</span>
-                                 <span className={`text-xs font-bold ${rem === 0 ? 'text-red-400' : rem <= 2 ? 'text-yellow-400' : 'text-green-400'}`}>{rem}</span>
-                               </div>
-                             );
-                           })}
-                         </div>
-                       )}
-                     </div>
-                    </Popup>
+                    <Tooltip direction="top" offset={[0, -8]} opacity={1}>
+                      <div>
+                        <p style={{fontWeight:'bold',marginBottom:2}}>{driver.full_name}</p>
+                        <p style={{color:'rgba(255,255,255,0.5)',fontSize:11,marginBottom:6}}>{driver.city} · {driver.vehicle_plate}</p>
+                        <p style={{fontSize:11,fontWeight:600,color:'rgba(255,255,255,0.7)',marginBottom:4}}>Inventory remaining:</p>
+                        {(driverInventories[driver.id] || []).length === 0 ? (
+                          <p style={{fontSize:11,color:'rgba(255,255,255,0.4)',fontStyle:'italic'}}>No inventory loaded</p>
+                        ) : (driverInventories[driver.id] || []).map(item => {
+                          const rem = (item.quantity_loaded || 0) - (item.quantity_sold || 0) - (item.quantity_spoiled || 0);
+                          return (
+                            <div key={item.id} style={{display:'flex',justifyContent:'space-between',gap:8,marginBottom:2}}>
+                              <span style={{fontSize:11,color:'rgba(255,255,255,0.8)'}}>{item.menu_item_name}</span>
+                              <span style={{fontSize:11,fontWeight:'bold',color: rem===0?'#f87171':rem<=2?'#facc15':'#4ade80'}}>{rem}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </Tooltip>
                   </Marker>
                 ) : null;
               }
@@ -310,29 +302,18 @@ export default function DispatchScreen() {
                   position={[order.delivery_latitude, order.delivery_longitude]}
                   icon={createOrderIcon(order)}
                 >
-                  <Popup>
-                    <div className="text-sm min-w-[160px] bg-gray-900 text-white rounded p-2 -m-3">
-                      <p className="font-bold mb-0.5">{order.customer_name}</p>
-                      <p className="text-white/50 text-xs mb-2">{order.delivery_address}</p>
-                      <div className="flex flex-col gap-0.5 mb-2">
-                        {(order.items || []).map((item, i) => (
-                          <div key={i} className="flex items-center justify-between text-xs">
-                            <span className="text-white/80">{item.name}</span>
-                            <span className="text-white/50 ml-2">×{item.quantity}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {selectedDriver && order.status === 'pending' && (
-                        <button
-                          onClick={() => assignOrder(order)}
-                          disabled={assigning === order.id}
-                          className="mt-2 w-full bg-white text-gray-900 rounded px-2 py-1 text-xs font-medium hover:bg-white/90"
-                        >
-                          {assigning === order.id ? 'Assigning...' : `Assign to ${selectedDriver.full_name}`}
-                        </button>
-                      )}
+                  <Tooltip direction="top" offset={[0, -44]} opacity={1}>
+                    <div>
+                      <p style={{fontWeight:'bold',marginBottom:2}}>{order.customer_name}</p>
+                      <p style={{color:'rgba(255,255,255,0.5)',fontSize:11,marginBottom:6}}>{order.delivery_address}</p>
+                      {(order.items || []).map((item, i) => (
+                        <div key={i} style={{display:'flex',justifyContent:'space-between',gap:8,marginBottom:2}}>
+                          <span style={{fontSize:11,color:'rgba(255,255,255,0.8)'}}>{item.name}</span>
+                          <span style={{fontSize:11,color:'rgba(255,255,255,0.5)'}}>×{item.quantity}</span>
+                        </div>
+                      ))}
                     </div>
-                  </Popup>
+                  </Tooltip>
                 </Marker>
               ) : null
             ))}
