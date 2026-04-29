@@ -221,12 +221,6 @@ export default function InventoryManagement() {
             const items = inventory[cat] || [];
             return (
               <div key={cat} className="bg-background border border-foreground/10 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-semibold text-foreground capitalize">{cat}</h2>
-                  <span className="text-sm px-3 py-1 rounded-full bg-foreground/10 text-foreground">
-                    {items.length} items
-                  </span>
-                </div>
 
                 {items.length === 0 ? (
                    <p className="text-foreground/60 text-sm italic">No items configured</p>
