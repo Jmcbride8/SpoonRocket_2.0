@@ -6,10 +6,11 @@ import OrderTracking from './customer/OrderTracking';
 import OrderDelivered from './customer/OrderDelivered';
 import OrderHistory from './customer/OrderHistory';
 import { useCustomerTab } from '@/lib/CustomerTabContext';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function CustomerHome() {
   const { tab, setTab, setTrackingBadge } = useCustomerTab();
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [activeOrder, setActiveOrder] = useState(null);
   const [driver, setDriver] = useState(null);
   const [showDelivered, setShowDelivered] = useState(false);
@@ -40,11 +41,8 @@ export default function CustomerHome() {
   }, [showDelivered]);
 
   useEffect(() => {
-    base44.auth.me().then(u => {
-      setUser(u);
-      loadActiveOrder(u);
-    });
-  }, []);
+    if (user) loadActiveOrder(user);
+  }, [user, loadActiveOrder]);
 
   // Poll active order every 20s
   useEffect(() => {

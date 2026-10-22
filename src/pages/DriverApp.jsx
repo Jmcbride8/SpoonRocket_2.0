@@ -28,6 +28,7 @@ export default function DriverApp() {
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const load = async () => {
+    try {
     const user = await base44.auth.me();
     const drivers = await base44.entities.Driver.filter({ user_email: user.email });
     if (drivers.length === 0) { setLoading(false); return; }
@@ -43,7 +44,19 @@ export default function DriverApp() {
     if (ord.find(o => o.status === 'accepted' || o.status === 'in_transit')) {
       setActiveOrder(ord.find(o => o.status === 'accepted' || o.status === 'in_transit'));
     }
-    setLoading(false);
+    } catch (error) {
+      if (error.status === 401) {
+        setDriver(null);
+        setInventory([]);
+        setOrders([]);
+        setActiveOrder(null);
+        base44.auth.redirectToLogin(window.location.href);
+        return;
+      }
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); const i = setInterval(load, 20000); return () => clearInterval(i); }, []);
